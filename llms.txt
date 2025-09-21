@@ -1795,7 +1795,7 @@ select = [
 ignore = [
     'E501', # rely on the formatter for line length
 ]
-extend-ignore = [".git", ".venv", "venv", "dist", "build"]
+# extend-ignore = [".git", ".venv", "venv", "dist", "build"]
 
 [tool.ruff.lint.isort]
 known-first-party = ['vexy_overnight']
@@ -1818,9 +1818,8 @@ from .updater import UpdateManager
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/cli.py
 # Language: python
 
-from pathlib import Path
-from typing import List, Optional
 from collections.abc import Callable, Iterable
+from pathlib import Path
 import fire
 from fire.core import FireError
 from . import __version__
@@ -1885,7 +1884,9 @@ class VomgrCLI:
         config_factory: Callable[[], ConfigManager] = ConfigManager,
         hook_factory: Callable[[], HookManager] = HookManager,
         launcher_factory: Callable[[], LauncherManager] = LauncherManager,
-        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(global_mode=global_mode),
+        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(
+            global_mode=global_mode
+        ),
         update_factory: Callable[[], UpdateManager] = UpdateManager,
         settings_loader: Callable[[], UserSettings] = load_user_settings,
         settings_saver: Callable[[UserSettings], Path] = save_user_settings,
@@ -1974,7 +1975,9 @@ def __init__((
         config_factory: Callable[[], ConfigManager] = ConfigManager,
         hook_factory: Callable[[], HookManager] = HookManager,
         launcher_factory: Callable[[], LauncherManager] = LauncherManager,
-        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(global_mode=global_mode),
+        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(
+            global_mode=global_mode
+        ),
         update_factory: Callable[[], UpdateManager] = UpdateManager,
         settings_loader: Callable[[], UserSettings] = load_user_settings,
         settings_saver: Callable[[UserSettings], Path] = save_user_settings,
@@ -2030,10 +2033,10 @@ def main(()) -> None:
 
 import json
 import shutil
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
-from collections.abc import Callable
+from typing import Any
 import tomli
 import tomli_w
 from loguru import logger
@@ -2123,12 +2126,7 @@ def _restore_from_backup((self, target: Path, backup: Path | None)) -> None:
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks.py
 # Language: python
 
-import json
-import os
-import subprocess
-import sys
 from pathlib import Path
-from typing import Dict, Optional
 from loguru import logger
 
 class HookManager:
@@ -2172,7 +2170,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 from loguru import logger
 import sys
 import sys
@@ -2266,7 +2263,6 @@ def voge(()):
 import os
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional
 from loguru import logger
 
 class RulesManager:
@@ -2319,13 +2315,12 @@ def replace_in_files((self, search_text: str, replace_text: str)):
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 from loguru import logger
 from . import __version__
 import re
 import json
-import urllib.request
 import json
+import urllib.request
 from datetime import datetime
 
 class UpdateManager:
@@ -2379,7 +2374,6 @@ import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 import tomli
 import tomli_w
 
@@ -2420,7 +2414,7 @@ def save_user_settings((settings: UserSettings, home: Path | None = None)) -> Pa
 from collections.abc import Mapping, Sequence
 from copy import copy, deepcopy
 from dataclasses import dataclass
-from typing import Any, Optional, TypedDict, Union
+from typing import Any, TypedDict
 from loguru import logger
 
 class Summary(T, y, p, e, d, D, i, c, t):
@@ -2529,7 +2523,6 @@ def test_version_returns_package_version((cli_with_mocks)):
 
 import json
 from pathlib import Path
-from collections.abc import Callable
 import pytest
 import tomli
 from vexy_overnight.config import ConfigManager
@@ -2546,12 +2539,16 @@ def _read_json((path: Path)) -> dict:
 
 def _read_toml((path: Path)) -> dict:
 
-def test_enable_claude_hook_when_write_fails_then_original_restored((fake_home: Path, monkeypatch: pytest.MonkeyPatch)) -> None:
+def test_enable_claude_hook_when_write_fails_then_original_restored((
+    fake_home: Path, monkeypatch: pytest.MonkeyPatch
+)) -> None:
     """Enable should restore original settings when writing fails."""
 
 def boom((*args, **kwargs)):
 
-def test_enable_claude_hook_when_validation_fails_then_original_restored((fake_home: Path, monkeypatch: pytest.MonkeyPatch)) -> None:
+def test_enable_claude_hook_when_validation_fails_then_original_restored((
+    fake_home: Path, monkeypatch: pytest.MonkeyPatch
+)) -> None:
     """Validation errors must roll back Claude settings."""
 
 def fail_validation((self: ConfigManager, path: Path)) -> None:
@@ -2562,12 +2559,16 @@ def test_enable_claude_hook_when_called_then_sets_stop_hook((fake_home: Path)) -
 def test_disable_claude_hook_when_enabled_then_removes_stop((fake_home: Path)) -> None:
     """Disable should remove Stop hook entries."""
 
-def test_enable_codex_hook_when_write_fails_then_original_restored((fake_home: Path, monkeypatch: pytest.MonkeyPatch)) -> None:
+def test_enable_codex_hook_when_write_fails_then_original_restored((
+    fake_home: Path, monkeypatch: pytest.MonkeyPatch
+)) -> None:
     """Enable should restore Codex config when writing fails."""
 
 def boom((*args, **kwargs)):
 
-def test_enable_codex_hook_when_validation_fails_then_original_restored((fake_home: Path, monkeypatch: pytest.MonkeyPatch)) -> None:
+def test_enable_codex_hook_when_validation_fails_then_original_restored((
+    fake_home: Path, monkeypatch: pytest.MonkeyPatch
+)) -> None:
     """Validation errors must roll back Codex config."""
 
 def fail_validation((self: ConfigManager, path: Path)) -> None:
@@ -2602,13 +2603,19 @@ def fake_home((tmp_path: Path, monkeypatch: pytest.MonkeyPatch)) -> Path:
 def hook_manager((fake_home: Path)) -> HookManager:
     """Hook manager configured to use the fake HOME directory."""
 
-def test_install_hooks_when_called_then_scripts_written((fake_home: Path, hook_manager: HookManager)) -> None:
+def test_install_hooks_when_called_then_scripts_written((
+    fake_home: Path, hook_manager: HookManager
+)) -> None:
     """Hook installation should create the expected hook scripts under HOME."""
 
-def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished((fake_home: Path, hook_manager: HookManager)) -> None:
+def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished((
+    fake_home: Path, hook_manager: HookManager
+)) -> None:
     """Claude hook should surface TODO items in the prompt it forwards."""
 
-def test_voco_go_when_context_string_then_uses_context_directory((fake_home: Path, hook_manager: HookManager, tmp_path: Path)) -> None:
+def test_voco_go_when_context_string_then_uses_context_directory((
+    fake_home: Path, hook_manager: HookManager, tmp_path: Path
+)) -> None:
     """Codex hook must interpret JSON context strings to locate the project directory."""
 
 
@@ -2632,13 +2639,12 @@ def test_write_session_state_when_data_provided_then_round_trips((fake_home: Pat
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/tests/test_user_settings.py
 # Language: python
 
-import json
 from pathlib import Path
 import pytest
 import tomli
 from vexy_overnight.user_settings import (
-    SETTINGS_FILE_NAME,
     CONTINUATION_TOOLS,
+    SETTINGS_FILE_NAME,
     UserSettings,
     load_user_settings,
     save_user_settings,
@@ -2677,11 +2683,11 @@ import vexy_overnight as pkg
 import vexy_overnight as pkg
 import vexy_overnight as pkg
 import vexy_overnight as pkg
-import vexy_overnight as pkg
 from types import MappingProxyType
 import vexy_overnight as pkg
 import vexy_overnight as pkg
 from collections import deque
+import vexy_overnight as pkg
 import vexy_overnight as pkg
 import vexy_overnight as pkg
 import vexy_overnight.vexy_overnight as module
@@ -2707,7 +2713,9 @@ def test_process_data_when_valid_input_then_returns_summary(()) -> None:
 
 def test_process_data_when_empty_input_then_raises_value_error(()) -> None:
 
-def test_process_data_when_non_sequence_like_input_then_raises_type_error((bad_input: object)) -> None:
+def test_process_data_when_non_sequence_like_input_then_raises_type_error((
+    bad_input: object,
+)) -> None:
 
 def test_process_data_when_config_options_then_copies_into_summary(()) -> None:
 

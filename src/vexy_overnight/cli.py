@@ -4,9 +4,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List, Optional
 from collections.abc import Callable, Iterable
+from pathlib import Path
 
 import fire
 from fire.core import FireError
@@ -171,7 +170,9 @@ class VomgrCLI:
         config_factory: Callable[[], ConfigManager] = ConfigManager,
         hook_factory: Callable[[], HookManager] = HookManager,
         launcher_factory: Callable[[], LauncherManager] = LauncherManager,
-        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(global_mode=global_mode),
+        rules_factory: Callable[[bool], RulesManager] = lambda global_mode=False: RulesManager(
+            global_mode=global_mode
+        ),
         update_factory: Callable[[], UpdateManager] = UpdateManager,
         settings_loader: Callable[[], UserSettings] = load_user_settings,
         settings_saver: Callable[[UserSettings], Path] = save_user_settings,
@@ -312,7 +313,10 @@ class VomgrCLI:
 
         if check:
             versions = updater.check_versions()
-            lines = [f"{tool}: {info['current']} -> {info['available']}" for tool, info in versions.items()]
+            lines = [
+                f"{tool}: {info['current']} -> {info['available']}"
+                for tool, info in versions.items()
+            ]
             messages.extend(lines if lines else ["No version information available"])
 
         if all or cli:

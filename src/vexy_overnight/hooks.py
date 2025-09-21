@@ -2,12 +2,7 @@
 # this_file: src/vexy_overnight/hooks.py
 """Continuation hook handlers for vomgr."""
 
-import json
-import os
-import subprocess
-import sys
 from pathlib import Path
-from typing import Dict, Optional
 
 from loguru import logger
 

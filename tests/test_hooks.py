@@ -45,7 +45,9 @@ def hook_manager(fake_home: Path) -> HookManager:
     return HookManager()
 
 
-def test_install_hooks_when_called_then_scripts_written(fake_home: Path, hook_manager: HookManager) -> None:
+def test_install_hooks_when_called_then_scripts_written(
+    fake_home: Path, hook_manager: HookManager
+) -> None:
     """Hook installation should create the expected hook scripts under HOME."""
     hook_manager.install_hooks()
 
@@ -58,7 +60,9 @@ def test_install_hooks_when_called_then_scripts_written(fake_home: Path, hook_ma
     assert gemini_hook.exists(), "Gemini hook placeholder must be written to ~/.gemini"
 
 
-def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished(fake_home: Path, hook_manager: HookManager) -> None:
+def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished(
+    fake_home: Path, hook_manager: HookManager
+) -> None:
     """Claude hook should surface TODO items in the prompt it forwards."""
     hook_manager.install_hooks()
     claude_hook = fake_home / ".claude" / "hooks" / "vocl-go.py"
@@ -99,7 +103,9 @@ def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished(fake_ho
     assert "item one" in prompt_value, "Prompt should include unfinished TODO entries"
 
 
-def test_voco_go_when_context_string_then_uses_context_directory(fake_home: Path, hook_manager: HookManager, tmp_path: Path) -> None:
+def test_voco_go_when_context_string_then_uses_context_directory(
+    fake_home: Path, hook_manager: HookManager, tmp_path: Path
+) -> None:
     """Codex hook must interpret JSON context strings to locate the project directory."""
     hook_manager.install_hooks()
     codex_hook = fake_home / ".codex" / "voco-go.py"

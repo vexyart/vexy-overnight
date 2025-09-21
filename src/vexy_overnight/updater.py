@@ -5,7 +5,6 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from loguru import logger
 
@@ -114,8 +113,8 @@ class UpdateManager:
     def _get_pypi_version(self, package: str) -> str:
         """Get available PyPI package version."""
         try:
-            import urllib.request
             import json
+            import urllib.request
 
             url = f"https://pypi.org/pypi/{package}/json"
             with urllib.request.urlopen(url, timeout=5) as response:

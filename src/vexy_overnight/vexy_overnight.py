@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from copy import copy, deepcopy
 from dataclasses import dataclass
-from typing import Any, Optional, TypedDict, Union
+from typing import Any, TypedDict
 
 from loguru import logger
 
@@ -51,7 +51,7 @@ def process_data(
 
     Returns a stable dictionary containing basic metrics that tests can rely on.
     """
-    if isinstance(data, (str, bytes)) or not isinstance(data, Sequence):
+    if isinstance(data, str | bytes) or not isinstance(data, Sequence):
         raise TypeError("Input data must be a sequence of records")
 
     if not data:

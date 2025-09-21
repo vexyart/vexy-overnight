@@ -151,7 +151,9 @@ def test_run_claude(cli_with_mocks):
 def test_run_codex(cli_with_mocks):
     message = cli_with_mocks.cli.run("codex", profile="gpt5")
     assert message == "Launched codex"
-    cli_with_mocks.launcher.launch_codex.assert_called_once_with(cwd=None, profile="gpt5", prompt=None)
+    cli_with_mocks.launcher.launch_codex.assert_called_once_with(
+        cwd=None, profile="gpt5", prompt=None
+    )
 
 
 def test_run_invalid_tool(cli_with_mocks):

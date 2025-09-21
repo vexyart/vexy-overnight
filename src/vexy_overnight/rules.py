@@ -5,7 +5,6 @@
 import os
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from loguru import logger
 
@@ -98,7 +97,7 @@ class RulesManager:
                         # Create hard link
                         os.link(parent_file, file_path)
                         logger.debug(f"Linked {file_path} to {parent_file}")
-                    except Exception as e:
+                    except Exception:
                         # If hard link fails, try symbolic link
                         try:
                             file_path.unlink()
@@ -169,7 +168,7 @@ class RulesManager:
         files_by_name = self.find_instruction_files()
         seen_inodes = set()
 
-        for filename, file_paths in files_by_name.items():
+        for _filename, file_paths in files_by_name.items():
             for file_path in file_paths:
                 # Skip if we've already processed this inode
                 inode = file_path.stat().st_ino

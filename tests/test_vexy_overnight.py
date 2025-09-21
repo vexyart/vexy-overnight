@@ -11,7 +11,9 @@ from loguru import logger
 def test_import_exposes_public_api() -> None:
     import vexy_overnight as pkg
 
-    assert {"__version__", "Config", "process_data"}.issubset(dir(pkg)), "Package should expose expected symbols"
+    assert {"__version__", "Config", "process_data"}.issubset(
+        dir(pkg)
+    ), "Package should expose expected symbols"
     assert callable(pkg.process_data), "Package should expose process_data callable"
 
 
@@ -35,8 +37,11 @@ def test_process_data_when_empty_input_then_raises_value_error() -> None:
     with pytest.raises(ValueError, match="cannot be empty"):
         pkg.process_data([])
 
+
 @pytest.mark.parametrize("bad_input", ["not a sequence of records", 42])  # type: ignore[misc]
-def test_process_data_when_non_sequence_like_input_then_raises_type_error(bad_input: object) -> None:
+def test_process_data_when_non_sequence_like_input_then_raises_type_error(
+    bad_input: object,
+) -> None:
     import vexy_overnight as pkg
 
     with pytest.raises(TypeError, match="sequence"):
@@ -56,8 +61,9 @@ def test_process_data_when_config_options_then_copies_into_summary() -> None:
 
 
 def test_process_data_when_options_mapping_proxy_then_copies_as_plain_dict() -> None:
-    import vexy_overnight as pkg
     from types import MappingProxyType
+
+    import vexy_overnight as pkg
 
     options = MappingProxyType({"nested": {"value": 1}})
     config = pkg.Config(name="meta", value=1, options=options)
@@ -106,15 +112,18 @@ def test_process_data_when_option_value_deepcopy_fails_then_falls_back() -> None
             return f"StubbornValue({self.marker})"
 
     stubborn = StubbornValue("token")
-    stubborn_summary = pkg.process_data([1], config=pkg.Config(name="meta", value=2, options={"stubborn": stubborn}))
+    stubborn_summary = pkg.process_data(
+        [1], config=pkg.Config(name="meta", value=2, options={"stubborn": stubborn})
+    )
 
     stubborn_option = stubborn_summary["options"]["stubborn"]
     assert stubborn_option == "StubbornValue(token)", "repr fallback should preserve descriptor"
 
 
 def test_process_data_when_tuple_and_deque_then_summary_remains_stable() -> None:
-    import vexy_overnight as pkg
     from collections import deque
+
+    import vexy_overnight as pkg
 
     tuple_summary = pkg.process_data((1, 2, 2))
     assert tuple_summary["count"] == 3, "Tuple input should count all items"
@@ -150,7 +159,9 @@ def test_process_data_when_debug_true_then_emits_debug_log() -> None:
     finally:
         logger.remove(sink_id)
 
-    assert any("Debug mode enabled" in message for message in messages), "Debug flag should emit debug log"
+    assert any(
+        "Debug mode enabled" in message for message in messages
+    ), "Debug flag should emit debug log"
 
 
 def test_main_when_called_then_logs_summary() -> None:
@@ -163,8 +174,11 @@ def test_main_when_called_then_logs_summary() -> None:
     finally:
         logger.remove(sink_id)
 
-    assert any("Processing completed" in message for message in messages), "Main should log completion message"
+    assert any(
+        "Processing completed" in message for message in messages
+    ), "Main should log completion message"
     assert any("'count': 3" in message for message in messages), "Main summary should include count"
+
 
 @pytest.mark.parametrize(  # type: ignore[misc]
     ("options", "match"),
@@ -188,7 +202,10 @@ def test_process_data_when_nested_options_then_summary_is_isolated() -> None:
     summary["options"]["nested"]["tags"].append("c")
 
     assert options["nested"]["tags"] == ["a", "b"], "Config options should track its own mutations"
-    assert summary["options"]["nested"]["tags"] == ["a", "c"], "Summary options should not share nested structures"
+    assert summary["options"]["nested"]["tags"] == [
+        "a",
+        "c",
+    ], "Summary options should not share nested structures"
 
 
 def test_process_data_summary_has_expected_keys() -> None:

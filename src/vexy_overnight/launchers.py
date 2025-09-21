@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 from loguru import logger
 
@@ -48,7 +47,9 @@ class LauncherManager:
     ):
         """Launch Claude with proper settings."""
         if not self.claude_cmd:
-            logger.error("Claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code")
+            logger.error(
+                "Claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code"
+            )
             sys.exit(1)
 
         cmd = [self.claude_cmd, "--dangerously-skip-permissions"]
@@ -105,10 +106,13 @@ class LauncherManager:
             cmd.extend(["-p", "-e"])
 
         # Add sandbox flags
-        cmd.extend([
-            "--dangerously-bypass-approvals-and-sandbox",
-            "--sandbox", "danger-full-access",
-        ])
+        cmd.extend(
+            [
+                "--dangerously-bypass-approvals-and-sandbox",
+                "--sandbox",
+                "danger-full-access",
+            ]
+        )
 
         # Add prompt
         if prompt:

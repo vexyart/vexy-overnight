@@ -4,15 +4,14 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 import tomli
 
 from vexy_overnight.user_settings import (
-    SETTINGS_FILE_NAME,
     CONTINUATION_TOOLS,
+    SETTINGS_FILE_NAME,
     UserSettings,
     load_user_settings,
     save_user_settings,
@@ -34,7 +33,9 @@ def test_user_settings_defaults_when_created_then_expected_mapping() -> None:
     assert defaults.continuations["claude"].target == "codex"
     assert defaults.continuations["codex"].target == "claude"
     assert not defaults.continuations["gemini"].enabled, "Gemini continuation disabled by default"
-    assert "{todo}" in defaults.prompts["claude"], "Default prompt should reference TODO placeholder"
+    assert (
+        "{todo}" in defaults.prompts["claude"]
+    ), "Default prompt should reference TODO placeholder"
     assert defaults.notifications.enabled is True
     assert defaults.kill_old_sessions is True
 
@@ -97,5 +98,3 @@ def test_user_settings_prompts_when_missing_then_inherit_default(tool: str) -> N
     prompt = settings.prompt_for(tool)
 
     assert "Continue" in prompt, "Fallback prompt should be informative"
-
-

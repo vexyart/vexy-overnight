@@ -8,7 +8,6 @@ import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import tomli
 import tomli_w
@@ -176,4 +175,3 @@ def save_user_settings(settings: UserSettings, home: Path | None = None) -> Path
     with open(target, "wb") as handle:
         tomli_w.dump(settings.to_dict(), handle)
     return target
-

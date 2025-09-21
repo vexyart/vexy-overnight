@@ -6,10 +6,10 @@ from __future__ import annotations
 
 import json
 import shutil
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
-from collections.abc import Callable
+from typing import Any
 
 import tomli
 import tomli_w
@@ -18,6 +18,7 @@ from loguru import logger
 
 class ConfigManager:
     """Manage Claude and Codex configuration files with rollback safety."""
+
     def __init__(self) -> None:
         home = Path.home()
         self.home = home
@@ -28,10 +29,13 @@ class ConfigManager:
     def backup_config(self, config_path: Path) -> Path | None:
         if not config_path.exists():
             return None
-        backup = config_path.with_suffix(f"{config_path.suffix}.backup.{datetime.now():%Y%m%d_%H%M%S}")
+        backup = config_path.with_suffix(
+            f"{config_path.suffix}.backup.{datetime.now():%Y%m%d_%H%M%S}"
+        )
         shutil.copy2(config_path, backup)
         logger.debug("Backed up %s to %s", config_path, backup)
         return backup
+
     def is_claude_hook_enabled(self) -> bool:
         if not self.claude_config.exists():
             return False
@@ -46,6 +50,7 @@ class ConfigManager:
             for hook in hooks.get("Stop", [])
             for inner in hook.get("hooks", [])
         )
+
     def is_codex_hook_enabled(self) -> bool:
         if not self.codex_config.exists():
             return False
@@ -56,12 +61,16 @@ class ConfigManager:
             logger.debug("Error checking Codex hook: %s", error)
             return False
         return any("voco-go" in item for item in notify)
+
     def enable_claude_hook(self) -> None:
         config = self._load_json(self.claude_config)
         command = f'"{self.home / ".claude" / "hooks" / "vocl-go.py"}" "$CLAUDE_PROJECT_DIR"'
-        config.setdefault("hooks", {})["Stop"] = [{"hooks": [{"type": "command", "command": command}]}]
+        config.setdefault("hooks", {})["Stop"] = [
+            {"hooks": [{"type": "command", "command": command}]}
+        ]
         self._write_json_with_rollback(self.claude_config, config)
         logger.info("Claude Stop hook enabled")
+
     def disable_claude_hook(self) -> None:
         if not self.claude_config.exists():
             return
@@ -73,11 +82,13 @@ class ConfigManager:
             self._write_json_with_rollback(self.claude_config, config)
         else:
             logger.debug("Claude Stop hook already absent; nothing to disable")
+
     def enable_codex_hook(self) -> None:
         config = self._load_toml(self.codex_config)
         config["notify"] = [str(self.home / ".codex" / "voco-go.py")]
         self._write_toml_with_rollback(self.codex_config, config)
         logger.info("Codex notify hook enabled")
+
     def disable_codex_hook(self) -> None:
         if not self.codex_config.exists():
             return
@@ -87,6 +98,7 @@ class ConfigManager:
             self._write_toml_with_rollback(self.codex_config, config)
         else:
             logger.debug("Codex notify hook already absent; nothing to disable")
+
     def is_tool_installed(self, tool: str) -> bool:
         from subprocess import run  # Local import keeps module scope minimal
 
@@ -94,6 +106,7 @@ class ConfigManager:
             return run(["which", tool], capture_output=True, text=True, check=False).returncode == 0
         except Exception:  # pragma: no cover - defensive guard
             return False
+
     def backup_legacy_configs(self) -> None:
         for path in (
             self.home / ".claude" / "settings.json",
@@ -102,6 +115,7 @@ class ConfigManager:
         ):
             if path.exists():
                 self.backup_config(path)
+
     def migrate_from_legacy(self) -> None:
         if self.claude_config.exists():
             self.backup_config(self.claude_config)
@@ -117,15 +131,19 @@ class ConfigManager:
             self.backup_config(self.codex_config)
             config = self._load_toml(self.codex_config)
             hook_path = str(self.home / ".codex" / "voco-go.py")
-            values = [hook_path if "codex4ever.py" in item else item for item in config.get("notify", [])]
+            values = [
+                hook_path if "codex4ever.py" in item else item for item in config.get("notify", [])
+            ]
             if values:
                 config["notify"] = values
                 self._write_toml_with_rollback(self.codex_config, config)
+
     def setup_configs(self) -> None:
         if not self.claude_config.exists():
             self._write_json_with_rollback(self.claude_config, {})
         if not self.codex_config.exists():
             self._write_toml_with_rollback(self.codex_config, {})
+
     def restore_defaults(self) -> None:
         self.disable_claude_hook()
         self.disable_codex_hook()
@@ -136,23 +154,27 @@ class ConfigManager:
             with open(path, encoding="utf-8") as handle:
                 return json.load(handle)
         return {}
+
     def _load_toml(self, path: Path) -> dict[str, Any]:
         if path.exists():
             with open(path, "rb") as handle:
                 return tomli.load(handle)
         return {}
+
     def _write_json_with_rollback(self, target: Path, data: dict[str, Any]) -> None:
         def write_json(path: Path) -> None:
             with open(path, "w", encoding="utf-8") as handle:
                 json.dump(data, handle, indent=2)
 
         self._write_with_rollback(target, write_json, self._validate_json_file)
+
     def _write_toml_with_rollback(self, target: Path, data: dict[str, Any]) -> None:
         def write_toml(path: Path) -> None:
             with open(path, "wb") as handle:
                 tomli_w.dump(data, handle)
 
         self._write_with_rollback(target, write_toml, self._validate_toml_file)
+
     def _write_with_rollback(
         self,
         target: Path,
@@ -168,17 +190,20 @@ class ConfigManager:
             write_func(tmp_path)
             validate_func(tmp_path)
             tmp_path.replace(target)
-        except Exception as error:
+        except Exception:
             if tmp_path.exists():
                 tmp_path.unlink()
             self._restore_from_backup(target, backup)
             raise
+
     def _validate_json_file(self, path: Path) -> None:
         with open(path, encoding="utf-8") as handle:
             json.load(handle)
+
     def _validate_toml_file(self, path: Path) -> None:
         with open(path, "rb") as handle:
             tomli.load(handle)
+
     def _restore_from_backup(self, target: Path, backup: Path | None) -> None:
         if backup and backup.exists():
             shutil.copy2(backup, target)

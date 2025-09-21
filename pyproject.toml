@@ -383,7 +383,7 @@ select = [
 ignore = [
     'E501', # rely on the formatter for line length
 ]
-extend-ignore = [".git", ".venv", "venv", "dist", "build"]
+# extend-ignore = [".git", ".venv", "venv", "dist", "build"]
 
 [tool.ruff.lint.isort]
 known-first-party = ['vexy_overnight']
