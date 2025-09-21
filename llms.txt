@@ -27,6 +27,7 @@ Project Structure:
 │   ├── 📄 test_cli.py
 │   ├── 📄 test_config.py
 │   ├── 📄 test_hooks.py
+│   ├── 📄 test_session_state.py
 │   ├── 📄 test_user_settings.py
 │   └── 📄 test_vexy_overnight.py
 ├── 📄 .gitignore
@@ -2609,6 +2610,23 @@ def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished((fake_h
 
 def test_voco_go_when_context_string_then_uses_context_directory((fake_home: Path, hook_manager: HookManager, tmp_path: Path)) -> None:
     """Codex hook must interpret JSON context strings to locate the project directory."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/tests/test_session_state.py
+# Language: python
+
+from pathlib import Path
+import pytest
+from vexy_overnight import session_state
+
+def fake_home((tmp_path: Path, monkeypatch: pytest.MonkeyPatch)) -> Path:
+    """Provide isolated HOME directory for session state tests."""
+
+def test_load_session_state_when_missing_then_returns_empty((fake_home: Path)) -> None:
+    """Loading before the file exists should yield an empty mapping."""
+
+def test_write_session_state_when_data_provided_then_round_trips((fake_home: Path)) -> None:
+    """Persisted state should be readable on the next load."""
 
 
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/tests/test_user_settings.py
