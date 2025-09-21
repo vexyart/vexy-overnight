@@ -58,12 +58,11 @@ Source = 'https://github.com/vexyart/vexy-overnight'
 
 # Development tools
 dev = [
-    'pre-commit>=4.1.0', # Pre-commit hook manager - Keep pre-commit as is, update if newer pre-commit version is required
-    'ruff>=0.9.7', # Linting and formatting - Keep ruff as is, update if newer ruff version is required
-    'mypy>=1.15.0', # Type checking - Keep mypy as is, update if newer mypy version is required
-    'absolufy-imports>=0.3.1', # Convert relative imports to absolute - Keep absolufy-imports as is, update if newer absolufy-imports version is required
-    'pyupgrade>=3.19.1', # Upgrade Python syntax - Keep pyupgrade as is, update if newer pyupgrade version is required
-    'isort>=6.0.1', # Sort imports - Keep isort as is, update if newer isort version is required
+    'hatch>=1.12.0', # Project management and build tooling
+    'uv>=0.5.8', # Fast dependency resolver and installer
+    'ruff>=0.9.7', # Linting and formatting
+    'mypy>=1.15.0', # Type checking
+    'pre-commit>=4.1.0', # Git hook management
 ]
 
 # Testing tools and frameworks
@@ -81,10 +80,6 @@ docs = [
     "sphinx-rtd-theme>=2.0.0",
     "sphinx-autodoc-typehints>=2.0.0",
     "myst-parser>=3.0.0", # Markdown support in Sphinx
-]
-
-# All optional dependencies combined
-all = [
 ]
 
 #------------------------------------------------------------------------------
@@ -136,37 +131,44 @@ version-file = "src/vexy_overnight/__version__.py"
 [tool.hatch.version]
 source = 'vcs' # Get version from git tags or other VCS info
 
+[tool.hatch.version.vcs]
+tag-pattern = '^(?:v)?(?P<version>\d+\.\d+\.\d+)$' # Enforce semantic version tags like v1.2.3
+
 # Metadata handling configuration
 [tool.hatch.metadata]
 allow-direct-references = true # Allow direct references in metadata (useful for local dependencies)
 
 
 #------------------------------------------------------------------------------
+# UV CONFIGURATION
+# Settings for uv so the project is always treated as a package.
+#------------------------------------------------------------------------------
+[tool.uv]
+package = true
+
+
+#------------------------------------------------------------------------------
 # DEVELOPMENT ENVIRONMENTS
 
 [tool.hatch.envs.default]
-features = ['dev', 'test', 'all']
+installer = 'uv'
+features = ['dev', 'test']
 dependencies = [
 ]
 
 # Commands available in the default environment
 [tool.hatch.envs.default.scripts]
 # Run tests with optional arguments
-test = 'pytest {args:tests}'
+test = 'python -m pytest {args:tests}'
 # Run tests with coverage reporting
-test-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src/vexy_overnight --cov=tests {args:tests}"
+test-cov = "python -m pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src/vexy_overnight --cov=tests {args:tests}"
 # Run type checking
-type-check = "mypy src/vexy_overnight tests"
+type-check = "python -m mypy src/vexy_overnight tests"
 # Run linting and formatting
-lint = ["ruff check src/vexy_overnight tests", "ruff format --respect-gitignore src/vexy_overnight tests"]
+lint = ["python -m ruff check src/vexy_overnight tests", "python -m ruff format --respect-gitignore src/vexy_overnight tests"]
 # Format and fix style issues
-fmt = ["ruff format --respect-gitignore src/vexy_overnight tests", "ruff check --fix src/vexy_overnight tests"]
-fix = ["ruff check --fix --unsafe-fixes src/vexy_overnight tests", "ruff format --respect-gitignore src/vexy_overnight tests"]
-
-# Matrix configuration to test across multiple Python versions
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.10", "3.11", "3.12"]
+fmt = ["python -m ruff format --respect-gitignore src/vexy_overnight tests", "python -m ruff check --fix src/vexy_overnight tests"]
+fix = ["python -m ruff check --fix --unsafe-fixes src/vexy_overnight tests", "python -m ruff format --respect-gitignore src/vexy_overnight tests"]
 
 #------------------------------------------------------------------------------
 # SPECIALIZED ENVIRONMENTS
@@ -177,22 +179,24 @@ python = ["3.10", "3.11", "3.12"]
 [tool.hatch.envs.lint]
 detached = true # Create a separate, isolated environment
 features = ['dev'] # Use dev extras  dependencies 
+installer = 'uv'
 
 # Linting environment commands
 [tool.hatch.envs.lint.scripts]
 # Type checking with automatic type installation
-typing = "mypy --install-types --non-interactive {args:src/vexy_overnight tests}"
+typing = "python -m mypy --install-types --non-interactive {args:src/vexy_overnight tests}"
 # Check style and format code
-style = ["ruff check {args:.}", "ruff format --respect-gitignore {args:.}"]
+style = ["python -m ruff check {args:.}", "python -m ruff format --respect-gitignore {args:.}"]
 # Format and fix style issues
-fmt = ["ruff format --respect-gitignore {args:.}", "ruff check --fix {args:.}"]
-fix = ["ruff check --fix --unsafe-fixes {args:.}", "ruff format --respect-gitignore {args:.}"]
+fmt = ["python -m ruff format --respect-gitignore {args:.}", "python -m ruff check --fix {args:.}"]
+fix = ["python -m ruff check --fix --unsafe-fixes {args:.}", "python -m ruff format --respect-gitignore {args:.}"]
 # Run all ops
 all = ["style", "typing", "fix"]
 
 # Dedicated environment for testing
 [tool.hatch.envs.test]
 features = ['test'] # Use test extras as dependencies
+installer = 'uv'
 
 # Testing environment commands
 [tool.hatch.envs.test.scripts]
@@ -208,18 +212,20 @@ bench-save = "python -m pytest -v -p no:briefcase tests/test_benchmark.py --benc
 # Documentation environment
 [tool.hatch.envs.docs]
 features = ['docs']
+installer = 'uv'
 
 # Documentation environment commands
 [tool.hatch.envs.docs.scripts]
-build = "sphinx-build -b html docs/source docs/build"
+build = "python -m sphinx -b html docs/source docs/build"
 
 # GitHub Actions workflow configuration
 [tool.hatch.envs.ci]
 features = ['test']
+installer = 'uv'
 
 
 [tool.hatch.envs.ci.scripts]
-test = "pytest --cov=src/vexy_overnight --cov-report=xml"
+test = "python -m pytest --cov=src/vexy_overnight --cov-report=xml"
 
 
 #------------------------------------------------------------------------------
@@ -339,97 +345,30 @@ compare = [
 
 #------------------------------------------------------------------------------
 # RUFF CONFIGURATION
-# Configuration for Ruff, including linter and formatter settings.
+# Streamlined Ruff setup with pragmatic defaults.
 #------------------------------------------------------------------------------ 
 
-# Ruff linter and formatter configuration
 [tool.ruff]
 target-version = "py310"
-line-length = 120
+line-length = 100
 
-# Linting rules configuration
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "double"
+
 [tool.ruff.lint]
-# Rule sets to enable, organized by category
 select = [
-    # flake8 plugins and extensions
-    'A', # flake8-builtins: checks for shadowed builtins
-    'ARG', # flake8-unused-arguments: checks for unused function arguments
-    'ASYNC', # flake8-async: checks for async/await issues
-    'B', # flake8-bugbear: finds likely bugs and design problems
-    'C', # flake8-comprehensions: helps write better list/dict comprehensions
-    'DTZ', # flake8-datetimez: checks for datetime timezone issues
-    'E', # pycodestyle errors: PEP 8 style guide errors
-    'EM', # flake8-errmsg: checks for better error messages
-    'F', # pyflakes: detects various errors
-    'FBT', # flake8-boolean-trap: checks for boolean traps in function signatures
-    'I', # isort: sorts imports
-    'ICN', # flake8-import-conventions: checks for import conventions
-    'ISC', # flake8-implicit-str-concat: checks for implicit string concatenation
-    'LOG', # flake8-logging: checks for logging issues
-    'N', # pep8-naming: checks naming conventions
-    'PLC', # pylint convention: checks for convention issues
-    'PLE', # pylint error: checks for errors
-    'PLR', # pylint refactor: suggests refactors
-    'PLW', # pylint warning: checks for suspicious code
-    'PT', # flake8-pytest-style: checks pytest-specific style
-    'PTH', # flake8-use-pathlib: checks for stdlib path usage vs pathlib
-    'PYI', # flake8-pyi: checks stub files
-    'RET', # flake8-return: checks return statement consistency
-    'RSE', # flake8-raise: checks raise statements
-    'RUF', # Ruff-specific rules
-    'S', # flake8-bandit: checks for security issues
-    'SIM', # flake8-simplify: checks for code simplification opportunities
-    'T', # flake8-print: checks for print statements
-    'TCH', # flake8-type-checking: helps with type-checking
-    'TID', # flake8-tidy-imports: checks for tidy import statements
-    'UP', # pyupgrade: checks for opportunities to use newer Python features
-    'W', # pycodestyle warnings: PEP 8 style guide warnings
-    'YTT', # flake8-2020: checks for misuse of sys.version or sys.version_info
-
+    'E',  # pycodestyle errors
+    'F',  # pyflakes errors
+    'B',  # flake8-bugbear
+    'I',  # import sorting
+    'N',  # pep8-naming
+    'UP', # modern Python upgrades
 ]
-# Rules to ignore (with reasons)
 ignore = [
-    'B027', # Empty method in abstract base class - sometimes needed for interfaces
-    'C901', # Function is too complex - sometimes complexity is necessary
-    'FBT003', # Boolean positional argument in function definition - sometimes unavoidable
-    'PLR0911', # Too many return statements - sometimes needed for readability
-    'PLR0912', # Too many branches - sometimes needed for complex logic
-    'PLR0913', # Too many arguments - sometimes needed in APIs
-    'PLR0915', # Too many statements - sometimes needed for comprehensive functions
-    'PLR1714', # Consider merging multiple comparisons - sometimes less readable
-    'PLW0603', # Using the global statement - sometimes necessary
-    'PT013', # Pytest explicit test parameter - sometimes clearer
-    'PTH123', # Path traversal - sometimes needed
-    'PYI056', # Calling open() in pyi file - sometimes needed in type stubs
-    'S105', # Possible hardcoded password - often false positives
-    'S106', # Possible hardcoded password - often false positives
-    'S107', # Possible hardcoded password - often false positives
-    'S110', # try-except-pass - sometimes valid for suppressing exceptions
-    'SIM102'
-    # Nested if statements - sometimes more readable than combined conditions
+    'E501', # rely on the formatter for line length
 ]
-# Rules that should not be automatically fixed
-unfixable = [
-    'F401', # Don't automatically remove unused imports - may be needed later
-
-]
-# Configure extend-exclude to ignore specific directories
 extend-exclude = [".git", ".venv", "venv", "dist", "build"]
 
-# isort configuration within Ruff
 [tool.ruff.lint.isort]
-known-first-party = ['vexy_overnight'] # Treat as first-party imports for sorting
-
-# flake8-tidy-imports configuration within Ruff
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = 'all' # Ban all relative imports for consistency
-
-# Per-file rule exceptions
-[tool.ruff.lint.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-'tests/**/*' = [
-    'PLR2004', # Allow magic values in tests for readability
-    'S101', # Allow assertions in tests
-    'TID252'
-    # Allow relative imports in tests for convenience
-]
+known-first-party = ['vexy_overnight']
