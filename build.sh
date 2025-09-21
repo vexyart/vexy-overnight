@@ -7,7 +7,6 @@ fd -e py -x pyupgrade --py311-plus {};
 fd -e py -x ruff check --output-format=github --fix --unsafe-fixes {}; 
 fd -e py -x ruff format --respect-gitignore --target-version py311 {};
 uvx hatch fmt;
-uv pip install --system --upgrade -e .
 
 EXCLUDE="*.svg,.specstory,ref,testdata,*.lock,llms.txt"
 if [[ -n "$1" ]]; then
@@ -19,3 +18,4 @@ uvx codetoprompt --compress --output "./llms.txt" --respect-gitignore --cxml --e
 gitnextver .; 
 uvx hatch build;
 uv publish;
+uv pip install --system --upgrade -e .
