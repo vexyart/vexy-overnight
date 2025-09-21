@@ -33,9 +33,9 @@ def test_user_settings_defaults_when_created_then_expected_mapping() -> None:
     assert defaults.continuations["claude"].target == "codex"
     assert defaults.continuations["codex"].target == "claude"
     assert not defaults.continuations["gemini"].enabled, "Gemini continuation disabled by default"
-    assert (
-        "{todo}" in defaults.prompts["claude"]
-    ), "Default prompt should reference TODO placeholder"
+    assert "{todo}" in defaults.prompts["claude"], (
+        "Default prompt should reference TODO placeholder"
+    )
     assert defaults.notifications.enabled is True
     assert defaults.kill_old_sessions is True
 

@@ -57,9 +57,9 @@ def test_enable_claude_hook_when_write_fails_then_original_restored(
     with pytest.raises(RuntimeError):
         manager.enable_claude_hook()
 
-    assert (
-        _read_json(settings_path) == original
-    ), "Claude config must be restored from backup on failure"
+    assert _read_json(settings_path) == original, (
+        "Claude config must be restored from backup on failure"
+    )
 
 
 def test_enable_claude_hook_when_validation_fails_then_original_restored(
@@ -80,9 +80,9 @@ def test_enable_claude_hook_when_validation_fails_then_original_restored(
     with pytest.raises(ValueError):
         manager.enable_claude_hook()
 
-    assert (
-        _read_json(settings_path) == original
-    ), "Claude config must roll back when validation fails"
+    assert _read_json(settings_path) == original, (
+        "Claude config must roll back when validation fails"
+    )
 
 
 def test_enable_claude_hook_when_called_then_sets_stop_hook(fake_home: Path) -> None:
@@ -145,9 +145,9 @@ def test_enable_codex_hook_when_write_fails_then_original_restored(
     with pytest.raises(RuntimeError):
         manager.enable_codex_hook()
 
-    assert _read_toml(config_path) == {
-        "profile": "gpt4"
-    }, "Codex config must be restored on failure"
+    assert _read_toml(config_path) == {"profile": "gpt4"}, (
+        "Codex config must be restored on failure"
+    )
 
 
 def test_enable_codex_hook_when_validation_fails_then_original_restored(
@@ -167,9 +167,9 @@ def test_enable_codex_hook_when_validation_fails_then_original_restored(
     with pytest.raises(ValueError):
         manager.enable_codex_hook()
 
-    assert _read_toml(config_path) == {
-        "profile": "gpt4"
-    }, "Codex config must roll back when validation fails"
+    assert _read_toml(config_path) == {"profile": "gpt4"}, (
+        "Codex config must roll back when validation fails"
+    )
 
 
 def test_enable_codex_hook_when_called_then_sets_notify(fake_home: Path) -> None:
@@ -181,9 +181,9 @@ def test_enable_codex_hook_when_called_then_sets_notify(fake_home: Path) -> None
     manager.enable_codex_hook()
 
     config = _read_toml(config_path)
-    assert config["notify"] == [
-        str(fake_home / ".codex" / "voco-go.py")
-    ], "Codex notify must reference voco-go"
+    assert config["notify"] == [str(fake_home / ".codex" / "voco-go.py")], (
+        "Codex notify must reference voco-go"
+    )
 
 
 def test_disable_codex_hook_when_notify_present_then_removed(fake_home: Path) -> None:

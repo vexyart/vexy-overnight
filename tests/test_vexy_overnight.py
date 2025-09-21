@@ -11,9 +11,9 @@ from loguru import logger
 def test_import_exposes_public_api() -> None:
     import vexy_overnight as pkg
 
-    assert {"__version__", "Config", "process_data"}.issubset(
-        dir(pkg)
-    ), "Package should expose expected symbols"
+    assert {"__version__", "Config", "process_data"}.issubset(dir(pkg)), (
+        "Package should expose expected symbols"
+    )
     assert callable(pkg.process_data), "Package should expose process_data callable"
 
 
@@ -159,9 +159,9 @@ def test_process_data_when_debug_true_then_emits_debug_log() -> None:
     finally:
         logger.remove(sink_id)
 
-    assert any(
-        "Debug mode enabled" in message for message in messages
-    ), "Debug flag should emit debug log"
+    assert any("Debug mode enabled" in message for message in messages), (
+        "Debug flag should emit debug log"
+    )
 
 
 def test_main_when_called_then_logs_summary() -> None:
@@ -174,9 +174,9 @@ def test_main_when_called_then_logs_summary() -> None:
     finally:
         logger.remove(sink_id)
 
-    assert any(
-        "Processing completed" in message for message in messages
-    ), "Main should log completion message"
+    assert any("Processing completed" in message for message in messages), (
+        "Main should log completion message"
+    )
     assert any("'count': 3" in message for message in messages), "Main summary should include count"
 
 

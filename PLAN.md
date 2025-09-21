@@ -1,55 +1,39 @@
 ---
 this_file: PLAN.md
 ---
-# Plan — Issue 101: Continuation Customization & Docs
+# Plan — Continuation Hooks & Version Tool Follow-Up (Issues 101 & 102)
 
 ## Scope (Single Sentence)
-Enable cross-tool continuation with customizable prompts, notifications, terminal targets, and session cleanup, and add a just-the-docs documentation site.
+Deliver configurable continuation hooks with documentation while validating the simplified version-bump tool across supported platforms.
 
-## Research Notes
-- Query: "Python library to launch commands in different terminal applications across macOS, Windows, and Linux" → subprocess remains core API; teletype/xonsh offer higher-level TTYs (Perplexity, 2025-09-21).
-- Query: "How to programmatically launch commands in specific terminal apps on macOS, Windows Terminal, and GNOME Terminal from Python" → platform-specific invocations via `open -a Terminal`, `wt`, `gnome-terminal -- bash -c` (Perplexity, 2025-09-21).
-- Query: "Cross-platform Python options for playing short notification sounds without external players" → recommends `beepy`, `chime`, `playsound3`, `play_sounds`, `simpleaudio` (Perplexity, 2025-09-21).
+## Current Objectives
+- Finish continuation runtime work so hooks honour user settings for prompts, notifications, terminals, and session cleanup.
+- Align manager/status flows and docs with the continuation feature set.
+- Close the remaining verification gap for the version-bump utility.
 
-## Technical Decisions
-- Store continuation preferences in `~/.vexy-overnight/settings.toml` managed by a new `user_settings` helper.
-- Add dependencies: `psutil` (cross-platform process termination) and `chime` (simple notification sounds) via pyproject optional extras.
-- Modify hook scripts (vocl-go, voco-go) to read settings, kill prior sessions, and launch next tool via platform-specific command templates.
-- Extend `vomgr` CLI with `continuation`, `prompt`, `notify`, and `terminal` subcommands for configuration.
-- Build docs site under `docs/` using GitHub Pages + just-the-docs remote theme with content synced from CLI features.
+## Task Breakdown
 
-## Phase Breakdown
+### Issue 101 · Continuation Runtime Enhancements
+- Regenerate `vocl-go`/`voco-go`/`voge-go` to read `settings.toml`, apply prompt templates, trigger optional audio notifications, and record PIDs in `session_state.json`.
+- Extend hook tests to cover mapping, template substitution, PID rotation, and failure fallbacks (mock `psutil`, settings, notification behaviour).
 
-### Completed Phases
-- **Phase A — Settings Infrastructure:** Created `src/vexy_overnight/user_settings.py` with dataclass defaults, load/save helpers, and TOML persistence under `~/.vexy-overnight/settings.toml` with backups.
-- **Phase B — CLI Extensions:** Added continuation/prompt/notify/terminal subcommands in `cli.py`, delegating to settings helpers while keeping functions concise.
+### Issue 101 · Config Manager & CLI Alignment
+- Update `ConfigManager` so `install`/`enable` respect continuation toggles and skip hook installation when disabled.
+- Extend `vomgr status` output to surface continuation destination, prompt override, notification flag, and terminal selection.
 
-### Phase C — Hook Runtime Enhancements
-- Regenerate hook scripts to:
-  - Read `settings.toml` for mapping, prompt template, notification text/sound, terminal command, kill-old flag.
-  - Collect TODO/PLAN context; substitute `{todo}` `{plan}` `{transcript}` placeholders.
-  - Play audio via `chime` when enabled; fall back gracefully if unavailable.
-  - Launch target tool using configured terminal command; default to subprocess direct call when not set.
-  - Record launched PID into `~/.vexy-overnight/session_state.json` and kill previous PID using `psutil` when flag on.
-- Update tests to cover direction mapping, prompt template expansion, and PID cleanup logic (mock `psutil.Process`).
+### Issue 101 · Documentation Site
+- Scaffold `docs/` with just-the-docs remote theme and create `index.md`, `getting-started.md`, `configuration.md`, and `hooks.md` covering continuation usage.
+- Refresh `README.md` with a concise docs link and summary of continuation customization features.
 
-### Phase D — Configuration Manager Alignment
-- Extend `ConfigManager` so `install/enable/disable` respect new toggles (skip enabling hooks when continuation disabled).
-- Add status reporting to include continuation target, prompt overrides, notification status, terminal selection.
+### Issue 101 · Verification
+- Broaden CLI and hook test suites to exercise new commands/behaviour (`tests/test_cli.py`, `tests/test_hooks.py`).
+- Run `python -m pytest -xvs` and `python -m pytest --cov=src --cov-report=term-missing` ensuring ≥70% coverage after new work.
 
-### Phase E — Documentation Site
-- Scaffold `docs/` with `_config.yml`, `index.md`, `getting-started.md`, `configuration.md`, `hooks.md`.
-- Configure remote theme `just-the-docs/just-the-docs`; add navigation, usage examples, and link to CLI commands.
-- Update README to point to docs site (≤200 lines constraint respected).
-
-### Phase F — Testing & Verification
-- Unit tests: `tests/test_user_settings.py`, expand `tests/test_cli.py`, `tests/test_hooks.py` for new behaviors.
-- Integration tests: simulate enable/disable flows with settings toggled; ensure session-state file updates.
-- Run `python -m pytest -xvs` and `python -m pytest --cov=src --cov-report=term-missing` ensuring ≥70% interim coverage.
+### Issue 102 · Version-Bump Validation
+- Perform manual cross-platform smoke tests (macOS + one additional OS via CI or documentation review) or document limitations if testing environments are unavailable.
 
 ## Exit Criteria
-- CLI commands configure continuation mapping, prompts, notifications, and terminals without manual file editing.
-- Hook scripts honour settings, kill old sessions when enabled, and provide audio notification.
-- Docs site builds locally (`bundle exec jekyll serve` instructions) and covers new features.
-- Tests cover new settings serialization, CLI plumbing, hook logic, and docs anchor existence.
-- README updated with docs pointer; CHANGELOG + WORK logs include verification steps.
+- Hooks honour user settings end-to-end, terminate old sessions when requested, and handle prompt templating plus notifications gracefully.
+- Manager commands fully reflect continuation configuration, and status output reports all relevant toggles.
+- Docs site builds locally, highlights continuation workflows, and README points to it within the 200-line limit.
+- Test suite covers new logic with the required coverage, and version-bump cross-platform expectations are recorded.

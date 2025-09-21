@@ -1,6 +1,59 @@
 ---
 this_file: CHANGELOG.md
 ---
+
+## 2025-09-21 - Session State Management & Testing Progress (Issues 101 & 102)
+
+### Phase C Progress (Issue 101)
+- **Session State Management**: Created `src/vexy_overnight/session_state.py` module
+  - `SessionInfo` dataclass for tracking tool, PID, start time, and working directory
+  - `SessionStateManager` for reading/writing/rotating sessions
+  - PID termination support with psutil (optional dependency)
+  - Comprehensive tests with 95% coverage
+- **Test Coverage**: Created comprehensive tests for session_state module
+  - 15 test cases covering all functionality
+  - Mock-based testing for process termination
+  - Edge case handling (corrupted files, missing processes)
+
+### Testing Infrastructure
+- **Test Coverage Progress**: Reached 56% overall coverage (approaching 70% target)
+- **Modules with High Coverage**:
+  - `session_state.py`: 95% coverage
+  - `user_settings.py`: 96% coverage
+  - `version_bump.py`: 90% coverage
+  - `cli.py`: 83% coverage
+  - `vexy_overnight.py`: 100% coverage
+
+### Remaining Work (Issue 101)
+- Phase C: Regenerate hooks to read settings and use session state
+- Phase D: Update ConfigManager for continuation toggles
+- Phase E: Documentation site scaffolding
+- Phase F: Final test coverage improvements to reach 70%
+
+## 2025-09-21 - Version Bump Tool Integration (Issue 102)
+- **Added simplified version-bump tool**: Created `src/vexy_overnight/tools/version_bump.py` (80 lines vs 448 original)
+- **Zero external dependencies**: Replaced GitPython/Rich/Fire/Loguru with stdlib subprocess calls
+- **Comprehensive test coverage**: 15 test cases covering all functions with 90% line coverage
+- **CLI integration**: Added `version-bump` entry point in pyproject.toml
+- **Documentation**: Updated README.md with usage examples and requirements
+- **Performance improvement**: <2s execution time vs complex original implementation
+- **Simplified error handling**: Basic try/catch with clear error messages
+- **Migration path**: Analyzed and documented transition from 448-line external script
+
+### Technical Details
+- `is_git_repo()`: Simple .git directory check
+- `get_next_version()`: Parse git tags, increment patch version (v1.2.3 → v1.2.4)
+- `check_clean_working_tree()`: Verify no uncommitted changes
+- `bump_version()`: Main workflow (pull, tag, push)
+- All git operations via subprocess.run() for reliability
+
+### Files Added
+- `src/vexy_overnight/tools/__init__.py`
+- `src/vexy_overnight/tools/version_bump.py`
+- `tests/test_version_bump.py`
+- `PLAN-102.md` (detailed implementation plan)
+- `TODO-102.md` (task breakdown)
+
 ## 2025-09-21 - /report Verification Sweep
 - Re-ran `python -m pytest -xvs` (61 passed) to confirm workspace health before starting new Phase C tasks.
 - Cleared completed Phase A/B objectives from `TODO.md` and documented remaining backlog explicitly.

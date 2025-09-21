@@ -22,6 +22,7 @@ Vexy Overnight Manager (`vomgr`) consolidates and simplifies the management of m
 - `vomgr rules` - Synchronize instruction files across projects
 - `vomgr update` - Update CLI tools and the package itself
 - `vomgr status` - View current configuration state
+- `version-bump` - Automated semantic version tagging for Git repositories
 
 ### Simplified Launchers
 
@@ -103,6 +104,33 @@ vomgr rules replace "old text" "new text"
 # Manage global instruction files in home directory
 vomgr rules --global sync
 ```
+
+### Version Management
+
+```bash
+# Simple version bump (patch increment)
+version-bump
+
+# Verbose output showing all operations
+version-bump --verbose
+
+# Example workflow:
+# 1. Make changes to your code
+# 2. Commit changes: git add . && git commit -m "Add new feature"
+# 3. Bump version: version-bump
+# 4. Version tag is created and pushed automatically
+```
+
+The `version-bump` tool automatically:
+- Detects the latest version tag (e.g., `v1.2.3`)
+- Increments the patch version (e.g., `v1.2.4`)
+- Creates a new Git tag
+- Pushes the tag to the remote repository
+
+**Requirements:**
+- Clean working directory (no uncommitted changes)
+- Git repository with remote configured
+- Existing version tags in `vX.Y.Z` format (or starts with `v1.0.0`)
 
 ### Launching AI Assistants
 
