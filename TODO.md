@@ -1,0 +1,15 @@
+---
+this_file: TODO.md
+---
+- [ ] Phase C · Regenerate vocl-go/voco-go hooks to read settings, play notification sound, and apply templates
+- [ ] Phase C · Implement session PID tracking + psutil-based old-session termination
+- [ ] Phase C · Create session_state.json writer/reader covered by tests
+- [ ] Phase C · Extend tests/test_hooks.py for mapping, prompt template, and PID cleanup scenarios
+- [ ] Phase D · Update ConfigManager & status output to respect continuation toggles and report settings
+- [ ] Phase D · Ensure install/enable skip hooks when continuation disabled in settings
+- [ ] Phase E · Scaffold docs/ Jekyll site with just-the-docs remote theme and core pages
+- [ ] Phase E · Update README.md with docs link and brief overview of new customization features
+- [ ] Phase F · Add tests/test_user_settings.py covering serialization, defaults, and validation
+- [ ] Phase F · Expand tests/test_cli.py to cover new configuration commands
+- [ ] Phase F · Verify full pytest run with coverage ≥70% interim target and document results in WORK.md
+- [ ] Phase F · Update CHANGELOG.md and WORK.md with this milestone once complete

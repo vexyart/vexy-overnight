@@ -33,6 +33,11 @@ classifiers = [
 ]
 
 dependencies = [
+    'loguru>=0.7,<1.0',
+    "fire>=0.6.0",
+    'rich>=13.0.0',
+    'tomli>=2.0.0',
+    'tomli-w>=1.0.0',
 ]
 
 # Author information
@@ -87,7 +92,10 @@ docs = [
 # Entry points for command-line executables installed with the package.
 #------------------------------------------------------------------------------
 [project.scripts]
-# CLINAME = "vexy_overnight.__main__:main"
+vomgr = "vexy_overnight.cli:main"
+vocl = "vexy_overnight.launchers:vocl"
+voco = "vexy_overnight.launchers:voco"
+voge = "vexy_overnight.launchers:voge"
 
 #------------------------------------------------------------------------------
 # BUILD SYSTEM CONFIGURATION
@@ -285,11 +293,17 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
+exclude = ["^external/"]
+
+[[tool.mypy.overrides]]
+module = ["loguru", "pytest"]
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
+allow_untyped_decorators = true
 
 #------------------------------------------------------------------------------
 # PYTEST CONFIGURATION
@@ -324,6 +338,7 @@ norecursedirs = [
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+pythonpath = ["src"]
 testpaths = ["tests"]
 
 [tool.pytest-benchmark]

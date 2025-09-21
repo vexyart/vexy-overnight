@@ -1,79 +1,107 @@
-#!/usr/bin/env python3
-"""vexy_overnight: 
+"""Core processing utilities for vexy_overnight."""
+# this_file: src/vexy_overnight/vexy_overnight.py
 
-Created by Fontlab Ltd
-"""
+from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+from copy import copy, deepcopy
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-import logging
+from typing import Any, Optional, TypedDict, Union
 
-__version__ = "0.1.0"
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
-@dataclass
+class Summary(TypedDict):
+    """Structured representation of ``process_data`` results."""
+
+    count: int
+    unique_count: int
+    types: list[str]
+    config_name: str | None
+    first_item: str
+    options: dict[str, Any]
+
+
+@dataclass(slots=True)
 class Config:
-    """Configuration settings for vexy_overnight."""
+    """Configuration settings for ``process_data`` summarisation."""
+
     name: str
-    value: Union[str, int, float]
-    options: Optional[Dict[str, Any]] = None
+    value: str | int | float
+    options: Mapping[str, Any] | None = None
+
+    def __post_init__(self) -> None:
+        if self.options is None:
+            return
+
+        if not isinstance(self.options, Mapping):
+            raise TypeError("Config options must be a mapping")
+
+        if any(not isinstance(key, str) for key in self.options):
+            raise TypeError("Config option keys must be strings")
 
 
 def process_data(
-    data: List[Any],
-    config: Optional[Config] = None,
+    data: Sequence[Any],
+    config: Config | None = None,
     *,
-    debug: bool = False
-) -> Dict[str, Any]:
-    """Process the input data according to configuration.
-    
-    Args:
-        data: Input data to process
-        config: Optional configuration settings
-        debug: Enable debug mode
-        
-    Returns:
-        Processed data as a dictionary
-        
-    Raises:
-        ValueError: If input data is invalid
+    debug: bool = False,
+) -> Summary:
+    """Summarise a non-empty sequence of data points.
+
+    Returns a stable dictionary containing basic metrics that tests can rely on.
     """
-    if debug:
-        logger.setLevel(logging.DEBUG)
-        logger.debug("Debug mode enabled")
-        
+    if isinstance(data, (str, bytes)) or not isinstance(data, Sequence):
+        raise TypeError("Input data must be a sequence of records")
+
     if not data:
         raise ValueError("Input data cannot be empty")
-        
-    # TODO: Implement data processing logic
-    result: Dict[str, Any] = {}
-    return result
+
+    if config is not None and not isinstance(config, Config):
+        raise TypeError("config must be a Config instance")
+
+    if debug:
+        logger.debug("Debug mode enabled")
+
+    if config and config.options is not None:
+        options_copy: dict[str, Any] = {}
+        for key, value in config.options.items():
+            try:
+                options_copy[key] = deepcopy(value)
+                continue
+            except Exception:
+                pass
+
+            try:
+                options_copy[key] = copy(value)
+                continue
+            except Exception:
+                options_copy[key] = repr(value)
+    else:
+        options_copy = {}
+
+    summary: Summary = {
+        "count": len(data),
+        "unique_count": len({repr(item) for item in data}),
+        "types": sorted({type(item).__name__ for item in data}),
+        "config_name": config.name if config else None,
+        "first_item": repr(data[0]),
+        "options": options_copy,
+    }
+
+    if debug:
+        logger.debug("Summary generated: {}", summary)
+
+    return summary
 
 
 def main() -> None:
-    """Main entry point for vexy_overnight."""
-    try:
-        # Example usage
-        config = Config(
-            name="default",
-            value="test",
-            options={"key": "value"}
-        )
-        result = process_data([], config=config)
-        logger.info("Processing completed: %s", result)
-        
-    except Exception as e:
-        logger.error("An error occurred: %s", str(e))
-        raise
+    """Entry point used by packaging scripts and manual invocation."""
+    sample = [1, 2, 3]
+    config = Config(name="default", value="demo", options={"label": "sample"})
+    summary = process_data(sample, config=config, debug=False)
+    logger.info("Processing completed: {}", summary)
 
 
 if __name__ == "__main__":
-    main() 
+    main()
