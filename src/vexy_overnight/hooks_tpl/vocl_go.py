@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from vexy_overnight.hook_runtime import (
     build_prompt,
@@ -30,7 +30,7 @@ TERMINAL_ENV_KEY = "{terminal_env_key}"
 FORCE_DIRECT_ENV_KEY = "{force_direct_env_key}"
 
 
-def read_payload() -> Dict[str, Any]:
+def read_payload() -> dict[str, Any]:
     """Read JSON payload supplied on stdin, returning an empty dict on failure."""
     try:
         raw = sys.stdin.read()
@@ -44,7 +44,7 @@ def read_payload() -> Dict[str, Any]:
         return dict()
 
 
-def determine_project_dir(payload: Dict[str, Any]) -> Path:
+def determine_project_dir(payload: dict[str, Any]) -> Path:
     """Select the project directory from env, payload, or current working directory."""
     env_value = os.environ.get(ENV_PROJECT_KEY)
     if env_value:

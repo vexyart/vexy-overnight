@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import importlib.resources as resources
 from pathlib import Path
-from typing import Dict
 
 from loguru import logger
 
@@ -100,7 +99,9 @@ class HookManager:
         self._write_template("voge_go.py", self.gemini_hook_path, {})
         logger.debug("Installed Gemini placeholder hook at {}", self.gemini_hook_path)
 
-    def _write_template(self, template_name: str, destination: Path, context: Dict[str, str]) -> None:
+    def _write_template(
+        self, template_name: str, destination: Path, context: dict[str, str]
+    ) -> None:
         """Render a stored template and write it to destination."""
         template = resources.files(TEMPLATE_PACKAGE).joinpath(template_name)
         content = template.read_text(encoding="utf-8")

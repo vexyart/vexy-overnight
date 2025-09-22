@@ -11,9 +11,9 @@ import shlex
 import shutil
 import subprocess
 import sys
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping
 
 try:
     from .user_settings import (
@@ -71,23 +71,23 @@ except Exception:  # pragma: no cover - defensive fallback when package import f
 
     @dataclass
     class TerminalPrefs:  # type: ignore[override]
-        defaults: Dict[str, List[str]] = field(default_factory=dict)
-        per_tool: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
+        defaults: dict[str, list[str]] = field(default_factory=dict)
+        per_tool: dict[str, dict[str, list[str]]] = field(default_factory=dict)
 
-        def command_for(self, tool: str, platform_key: str) -> List[str] | None:
+        def command_for(self, tool: str, platform_key: str) -> list[str] | None:
             per_tool = self.per_tool.get(tool, {})
             return per_tool.get(platform_key) or self.defaults.get(platform_key)
 
     @dataclass
     class UserSettings:  # type: ignore[override]
-        continuations: Dict[str, ContinuationPrefs]
-        prompts: Dict[str, str]
+        continuations: dict[str, ContinuationPrefs]
+        prompts: dict[str, str]
         notifications: NotificationPrefs
         terminals: TerminalPrefs
         kill_old_sessions: bool = True
 
         @classmethod
-        def default(cls) -> "UserSettings":
+        def default(cls) -> UserSettings:
             return cls(
                 continuations={
                     "claude": ContinuationPrefs(True, "codex"),
@@ -100,8 +100,9 @@ except Exception:  # pragma: no cover - defensive fallback when package import f
                 kill_old_sessions=True,
             )
 
-    def load_user_settings() -> "UserSettings":  # type: ignore[override]
+    def load_user_settings() -> UserSettings:  # type: ignore[override]
         return UserSettings.default()
+
 
 try:  # pragma: no cover - tests patch HOME instead of import failures
     from .session_state import SessionStateManager
@@ -135,7 +136,7 @@ def resolve_target(settings: UserSettings, tool: str) -> str:
     return target if target in CONTINUATION_TOOLS else "claude"
 
 
-def _collect_todo_lines(project_dir: Path) -> List[str]:
+def _collect_todo_lines(project_dir: Path) -> list[str]:
     todo_path = project_dir / "TODO.md"
     if not todo_path.exists():
         return []
@@ -188,7 +189,7 @@ def resolve_executable(command_name: str) -> str:
     return resolved or command_name
 
 
-def build_target_command(target_tool: str, project_dir: Path, prompt: str) -> List[str]:
+def build_target_command(target_tool: str, project_dir: Path, prompt: str) -> list[str]:
     """Build the command sequence for launching the target tool."""
     if target_tool == "codex":
         command = [
@@ -221,14 +222,14 @@ def prepare_env_updates(
     target_tool: str,
     prompt: str,
     project_dir: Path,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Prepare environment exports for helper and launched CLI."""
     notifications = settings.notifications
     try:
         message = notifications.message.format(target=target_tool, source=source_tool)
     except Exception:  # pragma: no cover - formatting guard
         message = notifications.message
-    env_updates: Dict[str, str] = {
+    env_updates: dict[str, str] = {
         "VOMGR_TARGET_TOOL": target_tool,
         "VOMGR_SOURCE_TOOL": source_tool,
         "VOMGR_PROMPT": prompt,
@@ -299,7 +300,9 @@ def launch_from_config(config: Mapping[str, object]) -> None:
     cwd_value = str(config.get("cwd", "")).strip()
     cwd = cwd_value or None
     env_payload = config.get("env", {})
-    env_updates = {str(key): str(value) for key, value in getattr(env_payload, "items", lambda: [])()}
+    env_updates = {
+        str(key): str(value) for key, value in getattr(env_payload, "items", lambda: [])()
+    }
     environment = os.environ.copy()
     environment.update(env_updates)
 
@@ -331,14 +334,19 @@ def _helper_command_string(helper_script: Path, project_dir: Path) -> str:
 
 
 def _run_helper_direct(helper_script: Path, project_dir: Path) -> None:
-    subprocess.run([sys.executable or "python3", str(helper_script)], cwd=str(project_dir), check=False)
+    subprocess.run(
+        [sys.executable or "python3", str(helper_script)], cwd=str(project_dir), check=False
+    )
 
 
 def _escape_applescript(value: str) -> str:
     escaped = value.replace("\\", "\\\\")
-    return escaped.replace('"', '\"')
+    return escaped.replace('"', '"')
 
-def _run_on_macos(helper_script: Path, project_dir: Path, command: str, terminal_env_key: str) -> None:
+
+def _run_on_macos(
+    helper_script: Path, project_dir: Path, command: str, terminal_env_key: str
+) -> None:
     terminal_app = os.environ.get(terminal_env_key) or "Terminal"
     osa = f'tell application "{terminal_app}" to do script "{_escape_applescript(command)}"'
     subprocess.run(["osascript", "-e", osa], check=False)

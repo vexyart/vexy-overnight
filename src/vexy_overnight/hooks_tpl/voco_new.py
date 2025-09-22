@@ -7,14 +7,13 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Dict
 
 from vexy_overnight.hook_runtime import launch_from_config
 
 CONFIG_FILENAME = "{config_filename}"
 
 
-def load_config(script_dir: Path) -> Dict[str, object]:
+def load_config(script_dir: Path) -> dict[str, object]:
     """Load the command configuration produced by the hook."""
     config_path = script_dir / CONFIG_FILENAME
     if not config_path.exists():

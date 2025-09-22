@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from vexy_overnight.hook_runtime import (
     build_prompt,
@@ -30,7 +30,7 @@ TERMINAL_ENV_KEY = "{terminal_env_key}"
 PROMPT_FALLBACK = "Continue working on the current task"
 
 
-def read_payload() -> Dict[str, Any]:
+def read_payload() -> dict[str, Any]:
     """Return JSON payload supplied on stdin, or an empty mapping."""
     try:
         raw = sys.stdin.read()
@@ -44,7 +44,7 @@ def read_payload() -> Dict[str, Any]:
         return dict()
 
 
-def _ensure_path(value: Optional[str]) -> Optional[Path]:
+def _ensure_path(value: str | None) -> Path | None:
     if not value:
         return None
     path = Path(value).expanduser()
@@ -53,7 +53,7 @@ def _ensure_path(value: Optional[str]) -> Optional[Path]:
     return None
 
 
-def _context_to_mapping(context: Any) -> Dict[str, Any]:
+def _context_to_mapping(context: Any) -> dict[str, Any]:
     if isinstance(context, dict):
         return context
     if isinstance(context, str):
@@ -71,7 +71,7 @@ def _context_to_mapping(context: Any) -> Dict[str, Any]:
     return dict()
 
 
-def _latest_session_directory() -> Optional[Path]:
+def _latest_session_directory() -> Path | None:
     sessions_root = Path.home() / SESSIONS_RELATIVE
     if not sessions_root.exists():
         return None
@@ -90,7 +90,7 @@ def _latest_session_directory() -> Optional[Path]:
                 except Exception:
                     continue
                 cwd = record.get("cwd")
-                path = _ensure_path(str(cwd)) if isinstance(cwd, (str, os.PathLike)) else None
+                path = _ensure_path(str(cwd)) if isinstance(cwd, str | os.PathLike) else None
                 if path is not None:
                     return path
         except Exception:
@@ -98,7 +98,7 @@ def _latest_session_directory() -> Optional[Path]:
     return None
 
 
-def determine_project_dir(payload: Dict[str, Any]) -> Path:
+def determine_project_dir(payload: dict[str, Any]) -> Path:
     """Infer Codex working directory from payload or session logs."""
     context = _context_to_mapping(payload.get("context"))
     candidate = context.get("cwd") or context.get("working_directory")

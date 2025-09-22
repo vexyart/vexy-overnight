@@ -122,7 +122,9 @@ def test_vocl_go_when_todo_items_present_then_prompt_includes_unfinished(
     recorded = json.loads(record_file.read_text())
     args = recorded["args"]
     assert Path(args[0]).name == "codex", "Continuation should invoke codex CLI by default"
-    assert any(arg.startswith("--cd=") for arg in args), "Codex command should include working directory"
+    assert any(arg.startswith("--cd=") for arg in args), (
+        "Codex command should include working directory"
+    )
     prompt_value = recorded["env"].get("VOMGR_PROMPT", "")
     assert "item one" in prompt_value, "Prompt should include unfinished TODO entries"
     assert recorded["env"].get("VOMGR_TARGET_TOOL") == "codex", "Target metadata must reach helper"
@@ -177,7 +179,9 @@ def test_voco_go_when_context_string_then_uses_context_directory(
     assert record_file.exists(), "Codex stub should be invoked and record arguments"
     recorded = json.loads(record_file.read_text())
     args = recorded["args"]
-    assert Path(args[0]).name == "claude", "Codex continuation should pivot back to Claude by default"
+    assert Path(args[0]).name == "claude", (
+        "Codex continuation should pivot back to Claude by default"
+    )
     assert "--prompt" in args, "Claude command should include prompt flag"
     prompt_value = args[args.index("--prompt") + 1]
     assert "codex task" in prompt_value, "Prompt should convey TODO items"

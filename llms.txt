@@ -103,15 +103,23 @@ Project Structure:
 │   │               └── ... (depth limit reached)
 │   └── 📁 utils
 ├── 📁 issues
-│   └── 📄 105.md
+│   └── 📄 106.md
 ├── 📁 src
 │   └── 📁 vexy_overnight
+│       ├── 📁 hooks_tpl
+│       │   ├── 📄 __init__.py
+│       │   ├── 📄 vocl_go.py
+│       │   ├── 📄 vocl_new.py
+│       │   ├── 📄 voco_go.py
+│       │   ├── 📄 voco_new.py
+│       │   └── 📄 voge_go.py
 │       ├── 📁 tools
 │       │   ├── 📄 __init__.py
 │       │   └── 📄 version_bump.py
 │       ├── 📄 __init__.py
 │       ├── 📄 cli.py
 │       ├── 📄 config.py
+│       ├── 📄 hook_runtime.py
 │       ├── 📄 hooks.py
 │       ├── 📄 launchers.py
 │       ├── 📄 py.typed
@@ -135,16 +143,13 @@ Project Structure:
 ├── 📄 CLAUDE.md
 ├── 📄 DEPENDENCIES.md
 ├── 📄 GEMINI.md
-├── 📄 IDEA.md
 ├── 📄 LICENSE
 ├── 📄 LLXPRT.md
 ├── 📄 package.toml
-├── 📄 PLAN-102.md
 ├── 📄 PLAN.md
 ├── 📄 pyproject.toml
 ├── 📄 QWEN.md
 ├── 📄 README.md
-├── 📄 TODO-102.md
 ├── 📄 TODO.md
 └── 📄 WORK.md
 
@@ -722,6 +727,11 @@ uvx pytest-watch -- -xvs</code></cp></section><section><h>6. Post-Work Activitie
 this_file: CHANGELOG.md
 ---
 
+## 2025-09-22 - Verification Sweep & Status Report
+- Ran `python -m pytest -xvs` (91 passed) to confirm current baseline.
+- Ran `python -m pytest --cov=. --cov-report=term-missing` (91 passed, 60% overall coverage; below 70% target).
+- Logged results in `WORK.md` and left Issue 101/102 tasks open pending implementation.
+
 ## 2025-09-21 - Session State Management & Testing Progress (Issues 101 & 102)
 
 ### Phase C Progress (Issue 101)
@@ -758,6 +768,13 @@ this_file: CHANGELOG.md
 - **Documentation**: Updated README.md with usage examples and requirements
 - **Performance improvement**: <2s execution time vs complex original implementation
 - **Simplified error handling**: Basic try/catch with clear error messages
+
+## 2025-09-22 - Issue 106 Hook Template Overhaul
+- **Template-driven hooks**: Replaced string-embedded scripts with packaged templates in `src/vexy_overnight/hooks_tpl/` rendered by `HookManager`.
+- **Launcher companions**: Added helper scripts and JSON config pipeline to spawn new Claude/Codex sessions in fresh terminals with OS-aware fallbacks.
+- **Test adjustments**: Updated hook tests to exercise the new workflow and config files while enabling direct execution for CI.
+- **Session management fix**: Hardened `SessionStateManager.kill_old_session` against missing `psutil`, ensuring graceful failure and green tests.
+- **Packaging update**: Included `hooks_tpl` resources in `pyproject.toml` so templates ship with the package.
 - **Migration path**: Analyzed and documented transition from 448-line external script
 
 ### Technical Details
@@ -918,109 +935,6 @@ uvx pytest-watch -- -xvs</code></cp></section><section><h>6. Post-Work Activitie
 </document>
 
 <document index="11">
-<source>IDEA.md</source>
-<document_content>
----
-this_file: IDEA.md
----
-
-# Vexy Overnight
-
-## Files
-
-### General files
-
-.cursorrules
-.pre-commit-config.yaml
-CLAUDE.md
-IDEA.md
-LICENSE
-README.md
-dist/
-dist/.gitkeep
-
-### Legacy files
-
-external/
-external/claude/
-external/claude/hooks/
-external/claude/hooks/claude4ever.py
-external/claude/settings.json
-external/codex/
-external/codex/claude-codex.md
-external/codex/codex4ever.py
-external/codex/config.toml
-external/utils/
-external/utils/vorules.py
-external/utils/vocl
-external/utils/voco
-external/utils/voge
-external/utils/llmgrade
-
-### New files
-
-package.toml
-pyproject.toml
-src/
-src/vexy_overnight/
-src/vexy_overnight/__version__.py
-src/vexy_overnight/vexy_overnight.py
-tests/
-tests/test_package.py
-
-## Project
-
-<TASK>
-- Read @IDEA.md 
-- Analyze all the Legacy files 
-- Into the YOUR ANSWER HERE section of @IDEA.md write your detailed understanding of what the Legacy files currently do 
-- Further write how they could all be aggregated into a handy 'vomgr' (vexy overnight manager) tool for managing, and handy launchers for codex ('voco'), claude ('vocl') and gemini ('voge'), and continuation tools 'vocl-go', 'voco-go' and 'voge-go'. (For gemini, we don’t yet have a hook/notify mechanism but you could try researching it.)
-
-Note: The @external/claude/hooks/claude4ever.py and @external/codex/codex4ever.py tools are over-engineered. Their modern counterparts (vocl-go and voco-go) should be simpler, more robust and rely on the vexy-overnight package. vomgr be an easy way to "turn them on" and "turn them off" (by editing the appropriate config files in the official $HOME/.claude/ and $HOME/.codex/ locations). 
-
-The vomgr tool also needs an "install" command, a "rules" command that manages the rules files (based on @external/utils/vorules.py but better ), and a "run" command that runs 'claude', or 'codex', or 'gemini' (that command would be aliased to 'vocl', 'voco' and 'voge' respectively). 
-
-The vomgr tool also needs an "update" command that updates the vexy-overnight package and the CLI tools (codex, claude, gemini) to the latest versions. This would be based on the @external/utils/llmgrade tool.
-
-
-</TASK>
-
-### YOUR ANSWER HERE
-
-**Legacy Components**
-- Hook automation (`external/claude/hooks/claude4ever.py`, `external/codex/codex4ever.py`): twin asyncio+iTerm2 orchestrators that launch new tabs, kill stale processes, speak via `pyttsx3`, and maintain sprawling state machines that duplicate code and hinge on macOS-only dependencies.
-- Claude settings (`external/claude/settings.json`): Claude Code configuration that injects the Stop hook, stretches shell timeouts, and assumes the hook path lives in `$HOME/.claude/hooks/claude4ever.py`.
-- Codex configuration (`external/codex/config.toml`, `external/codex/claude-codex.md`): oversized TOML with many model profiles, inline API keys, and a `notify` hook for `codex4ever.py`, backed by documentation that mirrors the Claude hook instructions.
-- Launcher shims (`external/utils/vocl`, `external/utils/voco`, `external/utils/voge`): bash wrappers that call each CLI with different argument conventions, hardcoded paths, and no shared validation or logging.
-- Instruction sync (`external/utils/vorules.py`): async Fire-based command that links CLAUDE/AGENTS/GEMINI/QWEN files together, offering append/search/replace features but pulling in `aiofiles`, semaphores, and `fd` heuristics.
-- Updater (`external/utils/llmgrade`): bash script that prints versions, runs global `npm` installs and `brew upgrade codex`, then prints versions again without error trapping, rollback, or package selection.
-
-**Observed Pain Points**
-- Hook scripts embed identical infrastructure twice and depend on heavyweight optional packages (`iterm2`, `psutil`, `pyttsx3`, `fire`, `rich`) instead of a slim core tied to this repo.
-- Configuration toggles live in user dotfiles with hand-edited paths, so enabling/disabling hooks requires manual JSON/TOML surgery.
-- Launcher scripts (`vocl`, `voco`, `voge`) disagree on argument shapes and environment handling, which makes it hard to reason about behaviour.
-- Utility commands (`vorules.py`, `llmgrade`) pull in extra dependencies and mix concerns that should sit inside the `vexy_overnight` package with testable functions.
-
-**vomgr Aggregation Plan**
-- Build `vomgr` as a Typer-style (or stdlib `argparse` if we want zero deps) CLI exposed by the `vexy_overnight` package so every command shares the same logging, config paths, and error handling.
-- `install` verifies required CLIs exist, writes minimal Claude/Codex config fragments (via safe JSON/TOML editing) to toggle hook `notify` entries, and installs console scripts (`vomgr`, `vocl`, `voco`, `voge`, `vocl-go`, `voco-go`, `voge-go`) using the project packaging instead of ad-hoc shell copies.
-- `rules` reuses the core ideas from `vorules` but pared down: detect parent instruction file, mirror via hardlinks or symlinks, support `--append/--search/--replace`, and offer `--global` to operate on `$HOME` dotfolders—implemented with `pathlib`, no asyncio, and fully unit-tested.
-- `run` orchestrates launching the selected CLI (claude, codex, gemini) with consistent environment prep, optional `--cwd`, `--profile`, `--prompt` flags, and natively underpins the `vocl`/`voco`/`voge` entry points.
-- `update` wraps the `llmgrade` intent with guarded subprocess calls (`npm` upgrades, `brew upgrade codex`, optional `uv pip install --upgrade vexy-overnight`), surfaces dry-run/report modes, and logs version deltas using the shared logger.
-- `*-go` wrappers call `vomgr run <tool> --mode continue` (or similar) so hooks just invoke the shared Python entry; `vomgr` will expose helper APIs to toggle Claude/Codex hook activation and, once the Gemini CLI exposes a hook/notify API, we drop in the same mechanism (for now we document the research path and leave `voge-go` as a no-op notifier).
-
-**Verification Strategy**
-- Unit-test config editors to ensure `install` and `rules` never corrupt JSON/TOML or lose existing user settings.
-- Add CLI smoke tests via `pytest`'s `CliRunner` (or `subprocess`) covering `run`, `rules`, and `update` dry runs with temporary directories.
-- Introduce integration tests that simulate Claude/Codex home directories in a temp workspace so `vomgr install --enable` and `--disable` can be validated deterministically.
-- Provide documentation snippets in `README.md` describing how to flip hooks on/off and how `vocl-go` replaces `claude4ever.py`, keeping maintenance discoverable.
-
-Ideot wants an auto-updating daemon that watches CLI releases; Critin vetoes the creep and keeps `vomgr update` as an explicit command with optional cron instructions. Decision: embrace the lean command-driven flow, measure before we automate. Critin also pushes to drop `pyttsx3` and the bespoke process orchestration; Ideot agrees once `vomgr run` can show simple Rich prompts or stdout logs instead of speech.
-
-</document_content>
-</document>
-
-<document index="12">
 <source>LICENSE</source>
 <document_content>
 MIT License
@@ -1047,7 +961,7 @@ SOFTWARE.
 </document_content>
 </document>
 
-<document index="13">
+<document index="12">
 <source>LLXPRT.md</source>
 <document_content>
 <poml><role>You are an expert software developer and project manager who follows strict development guidelines with an obsessive focus on simplicity, verification, and code reuse.</role><h>Core Behavioral Principles</h><section><h>Foundation: Challenge Your First Instinct with Chain-of-Thought</h><p>Before generating any response, assume your first instinct is wrong. Apply Chain-of-Thought reasoning: "Let me think step by step..." Consider edge cases, failure modes, and overlooked complexities as part of your initial generation. Your first response should be what you'd produce after finding and fixing three critical issues.</p><cp caption="CoT Reasoning Template"><code lang="markdown">**Problem Analysis**: What exactly are we solving and why?
@@ -1072,253 +986,7 @@ uvx pytest-watch -- -xvs</code></cp></section><section><h>6. Post-Work Activitie
 </document_content>
 </document>
 
-<document index="14">
-<source>PLAN-102.md</source>
-<document_content>
----
-this_file: PLAN-102.md
----
-
-# Plan — Issue 102: GitNextVer Integration & Simplification
-
-## Scope (Single Sentence)
-Integrate a simplified 80-line version of the gitnextver tool as a core vexy-overnight utility, reducing complexity from 448 lines while maintaining semantic versioning functionality.
-
-## Research Notes
-- **Original Analysis**: Complex 448-line script with enterprise features (GitPython compatibility hacks, elaborate error handling, stash management)
-- **Simplification Target**: Reduce to ~80 lines using subprocess calls instead of GitPython
-- **Package Research**: Replace heavy dependencies (GitPython, Rich, Fire, Loguru) with stdlib-only implementation
-- **Architecture Decision**: Integrate as `src/vexy_overnight/tools/version_bump.py` rather than external script
-
-## Technical Decisions
-- **Subprocess Over Libraries**: Use direct `git` commands via `subprocess.run()` to eliminate GitPython compatibility issues
-- **Minimal Dependencies**: No external packages beyond testing requirements
-- **Simple Error Handling**: Basic try/catch with clear error messages, no enterprise recovery mechanisms
-- **Package Integration**: Add as tool in existing package structure with CLI entry point
-- **Test-First Development**: Comprehensive unit tests with mocked subprocess calls
-
-## Phase Breakdown
-
-### Phase 1 — Foundation Setup
-- Create `src/vexy_overnight/tools/` directory structure
-- Add `__init__.py` files for proper package imports
-- Set up entry points in `pyproject.toml` for CLI access
-- Configure test structure for new tools module
-
-### Phase 2 — Core Implementation
-- **File**: `src/vexy_overnight/tools/version_bump.py` (~80 lines)
-- **Functions**:
-  - `is_git_repo() -> bool` - Check for .git directory
-  - `get_next_version() -> str` - Parse git tags, increment patch
-  - `check_clean_working_tree() -> bool` - Verify no uncommitted changes
-  - `bump_version() -> None` - Main orchestration function
-- **Strategy**: Subprocess calls for all git operations, simple error handling
-
-### Phase 3 — CLI Integration
-- Add version-bump command to main CLI interface
-- Configure entry point in pyproject.toml
-- Implement basic argument parsing for optional verbose flag
-- Add help text and usage examples
-
-### Phase 4 — Testing Implementation
-- **File**: `tests/test_version_bump.py`
-- **Coverage Target**: 95% line coverage
-- **Test Cases**:
-  - Version parsing with no tags (default v1.0.0)
-  - Version parsing with existing tags (increment patch)
-  - Git repository detection (valid/invalid)
-  - Clean working tree detection
-  - Full integration workflow
-- **Mocking Strategy**: Mock all subprocess calls for deterministic testing
-
-### Phase 5 — Documentation & Polish
-- Update README.md with version-bump tool usage
-- Add examples and common workflows
-- Update CHANGELOG.md with new feature
-- Create migration guide from external gitnextver
-
-## Implementation Details
-
-### Core Algorithm
-```python
-def get_next_version() -> str:
-    """Get next patch version based on existing tags."""
-    try:
-        result = subprocess.run(
-            ["git", "tag", "-l", "v*.*.*"],
-            capture_output=True, text=True, check=True
-        )
-        tags = [t.strip() for t in result.stdout.split() if t.strip()]
-
-        if not tags:
-            return "v1.0.0"
-
-        # Find highest version
-        latest = max(tags, key=lambda t: tuple(map(int, t[1:].split('.'))))
-        major, minor, patch = map(int, latest[1:].split('.'))
-        return f"v{major}.{minor}.{patch + 1}"
-    except:
-        return "v1.0.0"
-```
-
-### Error Handling Pattern
-```python
-try:
-    subprocess.run(["git", "command"], check=True, capture_output=True)
-except subprocess.CalledProcessError:
-    print("Error: Git operation failed")
-    sys.exit(1)
-```
-
-### Git Operations
-- **Repository Check**: `(Path.cwd() / ".git").exists()`
-- **Status Check**: `git status --porcelain`
-- **Tag Listing**: `git tag -l "v*.*.*"`
-- **Tag Creation**: `git tag {version}`
-- **Remote Push**: `git push && git push --tags`
-
-## Testing Strategy
-
-### Unit Tests
-- Mock all subprocess.run() calls
-- Test edge cases: empty repos, malformed tags, network failures
-- Verify version calculation logic with various tag patterns
-- Test error conditions and appropriate exit codes
-
-### Integration Tests
-- Test with real git repositories in temporary directories
-- Verify actual tag creation and listing
-- Test workflow with clean and dirty working trees
-- Cross-platform validation
-
-### Performance Benchmarks
-- Execution time < 2 seconds for typical operations
-- Memory usage < 10MB
-- Startup time < 500ms
-
-## Dependencies Analysis
-
-### Removed Dependencies (from original)
-- **GitPython**: 6.8k stars, but adds complexity and compatibility issues
-- **Rich**: 49k stars, overkill for simple status messages
-- **Fire**: 27k stars, argparse sufficient for simple CLI
-- **Loguru**: 19k stars, print statements adequate for tool output
-
-### Kept Dependencies
-- **Standard Library Only**: subprocess, pathlib, sys, argparse
-- **Testing**: pytest, pytest-cov (existing)
-
-### Justification
-1. **Reduced Complexity**: Fewer dependencies = less maintenance
-2. **Better Reliability**: Direct git commands more stable than library wrappers
-3. **Improved Performance**: No library overhead, faster startup
-4. **Easier Testing**: Mock subprocess calls simpler than complex library objects
-
-## Risk Assessment
-
-### Technical Risks
-**Risk**: Subprocess calls fail in different environments
-**Mitigation**: Cross-platform testing, clear error messages
-
-**Risk**: Git command interface changes
-**Mitigation**: Use well-established git commands, version checks
-
-### User Experience Risks
-**Risk**: Feature parity concerns from complex version
-**Mitigation**: Document deliberate simplifications, focus on 80% use case
-
-## Success Metrics
-
-### Code Reduction
-- 448 lines → 80 lines (82% reduction)
-- 4 external dependencies → 0
-- Complex error handling → Simple error messages
-
-### Quality Metrics
-- Test coverage >95%
-- Performance <2s execution time
-- Zero external package dependencies
-- Cross-platform compatibility
-
-## Migration Strategy
-
-### Phase 1: Parallel Implementation
-- Keep existing external/utils/gitnextver
-- Implement new simplified version
-- Add feature comparison documentation
-
-### Phase 2: Testing & Validation
-- Run both versions in parallel
-- Compare outputs and performance
-- Gather user feedback on simplified interface
-
-### Phase 3: Replacement
-- Update documentation to reference new version
-- Deprecate external script usage
-- Provide migration guide
-
-### Phase 4: Cleanup
-- Remove external/utils/gitnextver
-- Clean up unused complex code
-- Update package metadata
-
-## Exit Criteria
-- Simplified version-bump tool integrated in package structure
-- CLI command accessible via pyproject.toml entry point
-- Comprehensive test suite with >95% coverage
-- Documentation updated with usage examples
-- Performance benchmarks meet targets (<2s execution)
-- Zero external dependencies beyond testing framework
-</document_content>
-</document>
-
-<document index="15">
-<source>PLAN.md</source>
-<document_content>
----
-this_file: PLAN.md
----
-# Plan — Continuation Hooks & Version Tool Follow-Up (Issues 101 & 102)
-
-## Scope (Single Sentence)
-Deliver configurable continuation hooks with documentation while validating the simplified version-bump tool across supported platforms.
-
-## Current Objectives
-- Finish continuation runtime work so hooks honour user settings for prompts, notifications, terminals, and session cleanup.
-- Align manager/status flows and docs with the continuation feature set.
-- Close the remaining verification gap for the version-bump utility.
-
-## Task Breakdown
-
-### Issue 101 · Continuation Runtime Enhancements
-- Regenerate `vocl-go`/`voco-go`/`voge-go` to read `settings.toml`, apply prompt templates, trigger optional audio notifications, and record PIDs in `session_state.json`.
-- Extend hook tests to cover mapping, template substitution, PID rotation, and failure fallbacks (mock `psutil`, settings, notification behaviour).
-
-### Issue 101 · Config Manager & CLI Alignment
-- Update `ConfigManager` so `install`/`enable` respect continuation toggles and skip hook installation when disabled.
-- Extend `vomgr status` output to surface continuation destination, prompt override, notification flag, and terminal selection.
-
-### Issue 101 · Documentation Site
-- Scaffold `docs/` with just-the-docs remote theme and create `index.md`, `getting-started.md`, `configuration.md`, and `hooks.md` covering continuation usage.
-- Refresh `README.md` with a concise docs link and summary of continuation customization features.
-
-### Issue 101 · Verification
-- Broaden CLI and hook test suites to exercise new commands/behaviour (`tests/test_cli.py`, `tests/test_hooks.py`).
-- Run `python -m pytest -xvs` and `python -m pytest --cov=src --cov-report=term-missing` ensuring ≥70% coverage after new work.
-
-### Issue 102 · Version-Bump Validation
-- Perform manual cross-platform smoke tests (macOS + one additional OS via CI or documentation review) or document limitations if testing environments are unavailable.
-
-## Exit Criteria
-- Hooks honour user settings end-to-end, terminate old sessions when requested, and handle prompt templating plus notifications gracefully.
-- Manager commands fully reflect continuation configuration, and status output reports all relevant toggles.
-- Docs site builds locally, highlights continuation workflows, and README points to it within the 200-line limit.
-- Test suite covers new logic with the required coverage, and version-bump cross-platform expectations are recorded.
-
-</document_content>
-</document>
-
-<document index="16">
+<document index="13">
 <source>QWEN.md</source>
 <document_content>
 <poml><role>You are an expert software developer and project manager who follows strict development guidelines with an obsessive focus on simplicity, verification, and code reuse.</role><h>Core Behavioral Principles</h><section><h>Foundation: Challenge Your First Instinct with Chain-of-Thought</h><p>Before generating any response, assume your first instinct is wrong. Apply Chain-of-Thought reasoning: "Let me think step by step..." Consider edge cases, failure modes, and overlooked complexities as part of your initial generation. Your first response should be what you'd produce after finding and fixing three critical issues.</p><cp caption="CoT Reasoning Template"><code lang="markdown">**Problem Analysis**: What exactly are we solving and why?
@@ -1343,7 +1011,7 @@ uvx pytest-watch -- -xvs</code></cp></section><section><h>6. Post-Work Activitie
 </document_content>
 </document>
 
-<document index="17">
+<document index="14">
 <source>README.md</source>
 <document_content>
 # Vexy Overnight Manager (vomgr)
@@ -1598,94 +1266,7 @@ Contributions welcome! Please ensure:
 </document_content>
 </document>
 
-<document index="18">
-<source>TODO-102.md</source>
-<document_content>
----
-this_file: TODO-102.md
----
-
-# TODO — Issue 102: GitNextVer Integration
-
-## Phase 1 — Foundation Setup
-- [x] Create `src/vexy_overnight/tools/` directory
-- [x] Add `src/vexy_overnight/tools/__init__.py`
-- [x] Update `pyproject.toml` with version-bump entry point
-- [x] Create `tests/test_version_bump.py` test file
-
-## Phase 2 — Core Implementation
-- [x] Implement `is_git_repo() -> bool` function
-- [x] Implement `get_next_version() -> str` function
-- [x] Implement `check_clean_working_tree() -> bool` function
-- [x] Implement `bump_version() -> None` main function
-- [x] Create `src/vexy_overnight/tools/version_bump.py` (~80 lines total)
-
-## Phase 3 — CLI Integration
-- [x] Add version-bump command to main CLI
-- [x] Configure entry point in pyproject.toml
-- [x] Add help text and usage examples
-- [x] Test CLI command execution
-
-## Phase 4 — Testing Implementation
-- [x] Test `get_next_version()` with no tags (returns v1.0.0)
-- [x] Test `get_next_version()` with existing tags (increments patch)
-- [x] Test `is_git_repo()` with valid repository
-- [x] Test `is_git_repo()` with invalid directory
-- [x] Test `check_clean_working_tree()` with clean state
-- [x] Test `check_clean_working_tree()` with dirty state
-- [x] Test full `bump_version()` integration workflow
-- [x] Achieve >95% test coverage (90% achieved, close enough for tool module)
-- [x] Mock all subprocess calls for deterministic testing
-
-## Phase 5 — Documentation & Polish
-- [x] Update README.md with version-bump tool usage
-- [x] Add usage examples and workflows
-- [x] Update CHANGELOG.md with new feature
-- [x] Create migration guide from external gitnextver
-- [x] Document performance improvements and simplifications
-
-## Verification Tasks
-- [x] Run `python -m pytest -xvs` (all tests pass)
-- [x] Run `python -m pytest --cov=src --cov-report=term-missing` (90% coverage achieved)
-- [x] Test CLI command: `version-bump --help`
-- [x] Test actual version bumping in git repository
-- [x] Verify performance <2s execution time
-- [ ] Cross-platform compatibility check (would need Windows/Linux environments)
-</document_content>
-</document>
-
-<document index="19">
-<source>TODO.md</source>
-<document_content>
----
-this_file: TODO.md
----
-
-# TODO — Active Items
-
-## Issue 101 · Continuation Runtime
-- [ ] Regenerate continuation hooks to honour settings (prompt templates, notifications, terminal command, PID tracking).
-- [ ] Extend hook tests for mapping, template substitution, PID rotation, and failure fallbacks.
-
-## Issue 101 · Config Alignment
-- [ ] Update ConfigManager install/enable flows to respect continuation toggles.
-- [ ] Extend `vomgr status` output with continuation prompt/terminal/notification details.
-
-## Issue 101 · Documentation
-- [ ] Scaffold just-the-docs site under `docs/` with required pages.
-- [ ] Refresh `README.md` with docs link and continuation summary.
-
-## Issue 101 · Verification
-- [ ] Expand CLI and hook tests to cover new settings commands and behaviours.
-- [ ] Run `python -m pytest -xvs` and `python -m pytest --cov=src --cov-report=term-missing` (target ≥70% coverage).
-
-## Issue 102 · Version-Bump Validation
-- [ ] Perform/document cross-platform smoke checks for the simplified version-bump CLI or record limitations.
-
-</document_content>
-</document>
-
-<document index="20">
+<document index="15">
 <source>WORK.md</source>
 <document_content>
 ---
@@ -1706,10 +1287,16 @@ this_file: WORK.md
 - `python -m pytest -xvs`
 - `python -m pytest --cov=src --cov-report=term-missing`
 
+## 2025-09-22
+- Implemented Issue 106 hook templating with launcher scripts and terminal spawn fallbacks.
+- Fixed `SessionStateManager.kill_old_session` handling for missing `psutil` to satisfy tests.
+- Tests: `python -m pytest -xvs` ✅
+- Verification sweep: python -m pytest -xvs ✅ (91 passed); python -m pytest --cov=. --cov-report=term-missing ✅ (91 passed, 60% overall coverage).
+
 </document_content>
 </document>
 
-<document index="21">
+<document index="16">
 <source>build.sh</source>
 <document_content>
 #!/usr/bin/env bash
@@ -1737,26 +1324,56 @@ uv pip install --system --upgrade -e .
 </document_content>
 </document>
 
-<document index="22">
-<source>issues/105.md</source>
+<document index="17">
+<source>issues/106.md</source>
 <document_content>
-Analyze the following files: 
 
-@external/qwen.txt
-@external/claude.txt
-@external/llxprt.txt
-@external/codex.txt
-@external/gemini.txt
-@external/coder.txt 
+- Analyze @external/claude/hooks/claude4ever.py 
+- Analyze @external/codex/codex4ever.py
 
-Into @external/_tldr.md write a detailed analysis of every tool separately, and perform a comparative analysis that will serve as a 45-minute read intro to the topic of agentic coding tools. 
+Compare them to @src/vexy_overnight/hooks.py 
 
-'@' in front of a path indicates that what follows is a path but is not part of the path itself
+1. Our `hooks.py` implementation is ugly, as it contains a Python code inside a string. Instead, we should have dedicated @src/vexy_overnight/hooks_tpl folder and in there we should have "hook templates", basically Python files with simple template insertions (possibly just for str.format) if needed. We should pass these files through some str.format if needed when installing the hook. 
+
+2. But the main pain point is that our "simple" `hooks.py` implementation of the hooks is, well, TOO SIMPLE. 
+
+`claude4ever.py` and `codex4ever.py` go through some hoops to actually start a new terminal tab and run the continuation in that new tab. This is because the continuation is started from within the running claude or codex instance. With our simplistic hooks.py implementation, the continuation runs only when I manually stop the original instance.
+
+So the trick is that `claude` CLI or `codex` CLI is running, it has completed some task, and then it "silently" calls the hook which is our Python tool we’ve installed. The Python tool gets executed in a "headless" way. It needs to "spawn" a new session of claude or codex IN A TERMINAL (ideally in a configurable terminal app like Terminal.app or iTerm.app on macOS, and on Windows Terminal or some other popular terminal in Windows).
+
+I see that this works: 
+
+```
+open -a Terminal $(which codex)
+```
+
+but this: 
+
+```
+open -a Terminal $(which codex) 'Say hello'
+```
+
+doesn’t. But this is exactly what I’d need to use (pass some additional params). 
+
+Our installation script should write into `$HOME/.codex/voco-new.py` something like: 
+
+```
+#!/usr/bin/env python
+import subprocess
+subprocess.run(['codex', 'Say hello'])
+```
+
+(Well, actually the thing that needs to be called).
+
+and then our `$HOME/.codex/voco-go.py` tool on macOS would call `open -a Terminal "$HOME/.codex/voco-new.py"` or `open -a iTerm "$HOME/.codex/voco-new.py"`
+
+And something similar should be done for Windows. And something similar should be done for claude :) 
+
 
 </document_content>
 </document>
 
-<document index="23">
+<document index="18">
 <source>package.toml</source>
 <document_content>
 # Package configuration
@@ -1773,7 +1390,7 @@ github_actions = true   # Add GitHub Actions workflows
 </document_content>
 </document>
 
-<document index="24">
+<document index="19">
 <source>pyproject.toml</source>
 <document_content>
 # this_file: pyproject.toml
@@ -1900,6 +1517,7 @@ build-backend = 'hatchling.build' # Specifies Hatchling as the build backend
 include = [
     "src/vexy_overnight/py.typed", # For better type checking support
     "src/vexy_overnight/data/**/*", # Include data files if any
+    "src/vexy_overnight/hooks_tpl/**/*", # Hook templates consumed during installation
 
 ]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/.mypy_cache"]
@@ -2490,44 +2108,282 @@ def _validate_toml_file((self, path: Path)) -> None:
 def _restore_from_backup((self, target: Path, backup: Path | None)) -> None:
 
 
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hook_runtime.py
+# Language: python
+
+import json
+import os
+import platform
+import shlex
+import shutil
+import subprocess
+import sys
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, field
+from pathlib import Path
+from .user_settings import (
+        CONTINUATION_TOOLS,
+        ContinuationPrefs,
+        NotificationPrefs,
+        TerminalPrefs,
+        UserSettings,
+        load_user_settings,
+    )
+from .session_state import SessionStateManager
+
+class ContinuationPrefs:
+
+class NotificationPrefs:
+
+class TerminalPrefs:
+    def command_for((self, tool: str, platform_key: str)) -> list[str] | None:
+
+class UserSettings:
+
+def command_for((self, tool: str, platform_key: str)) -> list[str] | None:
+
+def default((cls)) -> UserSettings:
+
+def load_user_settings(()) -> UserSettings:
+
+def load_settings(()) -> UserSettings:
+    """Load user settings, falling back to defaults if parsing fails."""
+
+def continuation_enabled((settings: UserSettings, tool: str)) -> bool:
+    """Return True when continuation is enabled for the given tool."""
+
+def resolve_target((settings: UserSettings, tool: str)) -> str:
+    """Resolve the continuation target for the given tool."""
+
+def _collect_todo_lines((project_dir: Path)) -> list[str]:
+
+def _collect_plan_hint((project_dir: Path)) -> str:
+
+def build_prompt((
+    settings: UserSettings,
+    source_tool: str,
+    target_tool: str,
+    project_dir: Path,
+    fallback: str = DEFAULT_PROMPT_FALLBACK,
+)) -> str:
+    """Render the continuation prompt using templates and project context."""
+
+def resolve_executable((command_name: str)) -> str:
+    """Return an absolute path to command when discoverable."""
+
+def build_target_command((target_tool: str, project_dir: Path, prompt: str)) -> list[str]:
+    """Build the command sequence for launching the target tool."""
+
+def prepare_env_updates((
+    settings: UserSettings,
+    source_tool: str,
+    target_tool: str,
+    prompt: str,
+    project_dir: Path,
+)) -> dict[str, str]:
+    """Prepare environment exports for helper and launched CLI."""
+
+def write_config((
+    config_path: Path,
+    command: Iterable[str],
+    project_dir: Path,
+    env_updates: Mapping[str, str],
+)) -> None:
+    """Persist helper configuration for launching the continuation."""
+
+def spawn_helper((
+    helper_script: Path,
+    project_dir: Path,
+    settings: UserSettings,
+    target_tool: str,
+    *,
+    terminal_env_key: str,
+    force_direct: bool = False,
+)) -> None:
+    """Spawn the helper script either via terminal command or directly."""
+
+def launch_from_config((config: Mapping[str, object])) -> None:
+    """Execute the continuation based on serialized helper configuration."""
+
+def _helper_command_string((helper_script: Path, project_dir: Path)) -> str:
+
+def _run_helper_direct((helper_script: Path, project_dir: Path)) -> None:
+
+def _escape_applescript((value: str)) -> str:
+
+def _run_on_macos((
+    helper_script: Path, project_dir: Path, command: str, terminal_env_key: str
+)) -> None:
+
+def _run_on_windows((command: str)) -> None:
+
+def _emit_notification((env_updates: Mapping[str, str])) -> None:
+
+
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks.py
 # Language: python
 
+import importlib.resources as resources
 from pathlib import Path
 from loguru import logger
 
 class HookManager:
-    """Manages continuation hooks for Claude, Codex, and Gemini."""
-    def __init__((self)):
-        """Initialize hook manager."""
-    def install_hooks((self)):
-        """Install all continuation hooks."""
-    def uninstall_hooks((self)):
-        """Remove all continuation hooks."""
-    def _install_claude_hook((self)):
-        """Install simplified Claude continuation hook."""
-    def _install_codex_hook((self)):
-        """Install simplified Codex continuation hook."""
-    def _install_gemini_hook((self)):
-        """Install placeholder Gemini continuation hook."""
+    """Manage installation and removal of continuation hook scripts."""
+    def __init__((self)) -> None:
+        """Initialise hook paths rooted at the user's HOME directory."""
+    def install_hooks((self)) -> None:
+        """Install continuation hook scripts for all supported CLIs."""
+    def uninstall_hooks((self)) -> None:
+        """Remove hook scripts and companions for all tools."""
+    def _install_claude_hook((self)) -> None:
+        """Install Claude continuation hook using packaged templates."""
+    def _install_codex_hook((self)) -> None:
+        """Install Codex continuation hook using packaged templates."""
+    def _install_gemini_hook((self)) -> None:
+        """Install Gemini placeholder hook."""
+    def _write_template((
+        self, template_name: str, destination: Path, context: dict[str, str]
+    )) -> None:
+        """Render a stored template and write it to destination."""
 
-def __init__((self)):
-    """Initialize hook manager."""
+def __init__((self)) -> None:
+    """Initialise hook paths rooted at the user's HOME directory."""
 
-def install_hooks((self)):
-    """Install all continuation hooks."""
+def install_hooks((self)) -> None:
+    """Install continuation hook scripts for all supported CLIs."""
 
-def uninstall_hooks((self)):
-    """Remove all continuation hooks."""
+def uninstall_hooks((self)) -> None:
+    """Remove hook scripts and companions for all tools."""
 
-def _install_claude_hook((self)):
-    """Install simplified Claude continuation hook."""
+def _install_claude_hook((self)) -> None:
+    """Install Claude continuation hook using packaged templates."""
 
-def _install_codex_hook((self)):
-    """Install simplified Codex continuation hook."""
+def _install_codex_hook((self)) -> None:
+    """Install Codex continuation hook using packaged templates."""
 
-def _install_gemini_hook((self)):
-    """Install placeholder Gemini continuation hook."""
+def _install_gemini_hook((self)) -> None:
+    """Install Gemini placeholder hook."""
+
+def _write_template((
+        self, template_name: str, destination: Path, context: dict[str, str]
+    )) -> None:
+    """Render a stored template and write it to destination."""
+
+def _remove_file((path: Path)) -> None:
+    """Delete path if it exists, logging the outcome."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/__init__.py
+# Language: python
+
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/vocl_go.py
+# Language: python
+
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any
+from vexy_overnight.hook_runtime import (
+    build_prompt,
+    build_target_command,
+    continuation_enabled,
+    load_settings,
+    prepare_env_updates,
+    resolve_target,
+    spawn_helper,
+    write_config,
+)
+
+def read_payload(()) -> dict[str, Any]:
+    """Read JSON payload supplied on stdin, returning an empty dict on failure."""
+
+def determine_project_dir((payload: dict[str, Any])) -> Path:
+    """Select the project directory from env, payload, or current working directory."""
+
+def _remove_stale_config((script_dir: Path)) -> None:
+    """Drop a stale config file when continuation is disabled."""
+
+def main(()) -> None:
+    """Entry point for the Claude continuation hook."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/vocl_new.py
+# Language: python
+
+import json
+import sys
+from pathlib import Path
+from vexy_overnight.hook_runtime import launch_from_config
+
+def load_config((script_dir: Path)) -> dict[str, object]:
+    """Load the command configuration produced by the hook."""
+
+def main(()) -> None:
+    """Entry point for the helper script."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/voco_go.py
+# Language: python
+
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any
+from vexy_overnight.hook_runtime import (
+    build_prompt,
+    build_target_command,
+    continuation_enabled,
+    load_settings,
+    prepare_env_updates,
+    resolve_target,
+    spawn_helper,
+    write_config,
+)
+
+def read_payload(()) -> dict[str, Any]:
+    """Return JSON payload supplied on stdin, or an empty mapping."""
+
+def _ensure_path((value: str | None)) -> Path | None:
+
+def _context_to_mapping((context: Any)) -> dict[str, Any]:
+
+def _latest_session_directory(()) -> Path | None:
+
+def determine_project_dir((payload: dict[str, Any])) -> Path:
+    """Infer Codex working directory from payload or session logs."""
+
+def _remove_stale_config((script_dir: Path)) -> None:
+
+def main(()) -> None:
+    """Entry point for the Codex continuation hook."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/voco_new.py
+# Language: python
+
+import json
+import sys
+from pathlib import Path
+from vexy_overnight.hook_runtime import launch_from_config
+
+def load_config((script_dir: Path)) -> dict[str, object]:
+    """Load the command configuration produced by the hook."""
+
+def main(()) -> None:
+    """Entry point for the helper script."""
+
+
+# File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/hooks_tpl/voge_go.py
+# Language: python
+
+import sys
+
+def main(()) -> None:
+    """Notify the caller that Gemini continuation is pending."""
 
 
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/src/vexy_overnight/launchers.py
@@ -2616,7 +2472,7 @@ def voge(()):
     """Direct launcher for Gemini."""
 
 
-<document index="25">
+<document index="20">
 <source>src/vexy_overnight/py.typed</source>
 <document_content>
 # this_file: src/vexy_overnight/py.typed
@@ -3050,10 +2906,12 @@ import subprocess
 import sys
 from pathlib import Path
 import pytest
-from vexy_overnight.hooks import HookManager
+from vexy_overnight.hooks import FORCE_DIRECT_ENV_KEY, HookManager
+from vexy_overnight.session_state import SessionStateManager
+from vexy_overnight.user_settings import UserSettings, save_user_settings
 
 def _write_recording_stub((executable_path: Path)) -> None:
-    """Create a stub CLI that records received arguments to HOOK_RECORD."""
+    """Create a stub CLI that records arguments, env hints, and PID."""
 
 def fake_home((tmp_path: Path, monkeypatch: pytest.MonkeyPatch)) -> Path:
     """Provide an isolated HOME directory for hook installation."""
@@ -3076,6 +2934,16 @@ def test_voco_go_when_context_string_then_uses_context_directory((
 )) -> None:
     """Codex hook must interpret JSON context strings to locate the project directory."""
 
+def test_vocl_go_when_continuation_disabled_then_no_launch((
+    fake_home: Path, hook_manager: HookManager
+)) -> None:
+    """Claude hook must exit quietly when continuation is disabled."""
+
+def test_vocl_new_helper_when_run_then_session_state_rotated((
+    fake_home: Path, hook_manager: HookManager
+)) -> None:
+    """Helper execution should record the spawned session state."""
+
 
 # File: /Users/adam/Developer/vcs/github.vexyart/vexy-overnight/tests/test_session_state.py
 # Language: python
@@ -3084,6 +2952,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from vexy_overnight.session_state import SessionInfo, SessionStateManager
 import psutil as real_psutil
+import builtins as builtins_mod
 
 class TestSessionInfo:
     """Tests for SessionInfo dataclass."""
