@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/session_state.py
-"""Session state management for PID tracking and continuation control."""
+"""Persist and manage session state for continuation helpers."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ SESSION_STATE_FILE = "session_state.json"
 
 @dataclass
 class SessionInfo:
-    """Information about an active session."""
+    """Serialisable representation of a single CLI session."""
 
     tool: str  # claude, codex, or gemini
     pid: int
@@ -24,12 +24,23 @@ class SessionInfo:
     cwd: str
 
     def to_dict(self) -> dict[str, str | int]:
-        """Convert to dictionary for JSON serialization."""
+        """Serialise the session information into a JSON-safe dictionary.
+
+        Returns:
+            dict[str, str | int]: Mapping with primitive values ready for JSON.
+        """
         return {"tool": self.tool, "pid": self.pid, "start_time": self.start_time, "cwd": self.cwd}
 
     @classmethod
     def from_dict(cls, data: dict[str, str | int]) -> SessionInfo:
-        """Create from dictionary."""
+        """Create a :class:`SessionInfo` instance from a JSON payload.
+
+        Args:
+            data: Mapping produced by :meth:`to_dict`.
+
+        Returns:
+            SessionInfo: Reconstructed dataclass instance.
+        """
         return cls(
             tool=str(data["tool"]),
             pid=int(data["pid"]),
@@ -39,17 +50,26 @@ class SessionInfo:
 
 
 class SessionStateManager:
-    """Manages session state for continuation hooks."""
+    """Persist session metadata so continuation hooks can coordinate state."""
 
     def __init__(self, state_dir: Path | None = None):
-        """Initialize session state manager."""
+        """Create a manager storing state under ``state_dir`` if provided.
+
+        Args:
+            state_dir: Optional directory override for the session file.
+        """
         if state_dir is None:
             state_dir = Path.home() / VEXY_STATE_DIR
         self.state_file = state_dir / SESSION_STATE_FILE
         self.state_file.parent.mkdir(parents=True, exist_ok=True)
 
     def read_session(self) -> SessionInfo | None:
-        """Read current session info if it exists."""
+        """Return the persisted session information, if available.
+
+        Returns:
+            SessionInfo | None: Current session metadata or ``None`` when the
+            state file is missing or invalid.
+        """
         if not self.state_file.exists():
             return None
 
@@ -62,7 +82,16 @@ class SessionStateManager:
             return None
 
     def write_session(self, tool: str, pid: int, cwd: str | None = None) -> SessionInfo:
-        """Write new session info."""
+        """Persist metadata for the currently running session.
+
+        Args:
+            tool: Name of the CLI tool (``claude``, ``codex``, ``gemini``).
+            pid: Process identifier for the launched CLI.
+            cwd: Optional working directory override.
+
+        Returns:
+            SessionInfo: The serialised session data that was written.
+        """
         session = SessionInfo(
             tool=tool, pid=pid, start_time=datetime.now().isoformat(), cwd=cwd or os.getcwd()
         )
@@ -73,12 +102,19 @@ class SessionStateManager:
         return session
 
     def clear_session(self) -> None:
-        """Clear the current session state."""
+        """Delete the persisted session file when present."""
         if self.state_file.exists():
             self.state_file.unlink()
 
     def kill_old_session(self, session: SessionInfo) -> bool:
-        """Kill an old session process if it exists."""
+        """Terminate the process described by ``session`` if it is still alive.
+
+        Args:
+            session: Session metadata describing the process to terminate.
+
+        Returns:
+            bool: ``True`` if a matching process was terminated.
+        """
         try:
             import psutil
         except ImportError:
@@ -109,7 +145,17 @@ class SessionStateManager:
     def rotate_session(
         self, tool: str, pid: int, cwd: str | None = None, kill_old: bool = True
     ) -> SessionInfo:
-        """Rotate to a new session, optionally killing the old one."""
+        """Persist a new session and optionally terminate the previous one.
+
+        Args:
+            tool: Tool name for the new session.
+            pid: Process identifier for the new session.
+            cwd: Optional working directory override.
+            kill_old: When ``True`` attempt to terminate the previous session.
+
+        Returns:
+            SessionInfo: Metadata describing the newly written session state.
+        """
         # Read existing session
         old_session = self.read_session()
 

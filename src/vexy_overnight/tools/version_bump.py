@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/tools/version_bump.py
-"""Simple version bumping tool for Git repositories."""
+"""Automate semantic version tagging for Git repositories."""
 
 import subprocess
 import sys
@@ -8,12 +8,20 @@ from pathlib import Path
 
 
 def is_git_repo() -> bool:
-    """Check if current directory is a git repository."""
+    """Return whether the current working directory is a Git repository.
+
+    Returns:
+        bool: ``True`` when a ``.git`` directory is present.
+    """
     return (Path.cwd() / ".git").exists()
 
 
 def get_next_version() -> str:
-    """Get next patch version based on existing tags."""
+    """Compute the next semantic version tag based on existing ``vX.Y.Z`` tags.
+
+    Returns:
+        str: Next version string prefixed with ``v``.
+    """
     try:
         result = subprocess.run(
             ["git", "tag", "-l", "v*.*.*"], capture_output=True, text=True, check=True
@@ -38,7 +46,7 @@ def get_next_version() -> str:
 
 
 def check_clean_working_tree() -> bool:
-    """Ensure working tree is clean."""
+    """Return ``True`` when ``git status`` reports a clean working tree."""
     try:
         result = subprocess.run(
             ["git", "status", "--porcelain"], capture_output=True, text=True, check=True
@@ -49,7 +57,12 @@ def check_clean_working_tree() -> bool:
 
 
 def bump_version(verbose: bool = False) -> None:
-    """Main version bumping function."""
+    """Create and push the next semantic version tag for the repository.
+
+    Args:
+        verbose: When ``True`` emit progress messages and stream subprocess
+            output; otherwise keep commands quiet.
+    """
     if not is_git_repo():
         print("Error: Not a git repository")
         sys.exit(1)
@@ -92,7 +105,7 @@ def bump_version(verbose: bool = False) -> None:
 
 
 def main() -> None:
-    """CLI entry point for version bump tool."""
+    """Parse CLI arguments and delegate to :func:`bump_version`."""
     import argparse
 
     parser = argparse.ArgumentParser(description="Bump semantic version and create git tag")

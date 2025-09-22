@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/hooks_tpl/voco_new.py
-"""Companion launcher for Codex continuation hooks."""
+"""Helper script executed by Codex continuation hooks to resume work."""
 
 from __future__ import annotations
 
@@ -14,7 +14,15 @@ CONFIG_FILENAME = "{config_filename}"
 
 
 def load_config(script_dir: Path) -> dict[str, object]:
-    """Load the command configuration produced by the hook."""
+    """Read the helper configuration produced by ``voco-go``.
+
+    Args:
+        script_dir: Directory containing the JSON configuration file.
+
+    Returns:
+        dict[str, object]: Parsed configuration or an empty dict when the
+        payload is missing or malformed.
+    """
     config_path = script_dir / CONFIG_FILENAME
     if not config_path.exists():
         sys.stderr.write("Missing config file " + CONFIG_FILENAME + ".\n")
@@ -27,7 +35,7 @@ def load_config(script_dir: Path) -> dict[str, object]:
 
 
 def main() -> None:
-    """Entry point for the helper script."""
+    """Entry point that loads configuration and launches the continuation."""
     script_dir = Path(__file__).resolve().parent
     config = load_config(script_dir)
     if not config:

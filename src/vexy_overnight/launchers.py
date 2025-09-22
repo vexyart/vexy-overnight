@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/launchers.py
-"""Tool launcher logic for vomgr."""
+"""Fire-facing launch helpers for Claude, Codex, and Gemini CLIs."""
 
 import os
 import subprocess
@@ -11,16 +11,29 @@ from loguru import logger
 
 
 class LauncherManager:
-    """Manages launching of AI assistant CLI tools."""
+    """Resolve CLI binaries and expose convenience launch methods.
+
+    The manager keeps per-tool launch logic isolated so both CLI commands and
+    tests can invoke the same code paths.  Each launch method performs minimal
+    argument translation and delegates to :mod:`subprocess`.
+    """
 
     def __init__(self):
-        """Initialize launcher manager."""
+        """Look up command paths once so subsequent launches are cheap."""
         self.claude_cmd = self._find_command("claude")
         self.codex_cmd = self._find_command("codex")
         self.gemini_cmd = self._find_command("gemini")
 
     def _find_command(self, cmd: str) -> str | None:
-        """Find command in PATH."""
+        """Locate ``cmd`` in ``PATH`` or known installation directories.
+
+        Args:
+            cmd: Command name to resolve.
+
+        Returns:
+            str | None: Absolute path to the executable, or ``None`` if not
+            found.
+        """
         result = subprocess.run(["which", cmd], capture_output=True, text=True)
         if result.returncode == 0:
             return result.stdout.strip()
@@ -45,7 +58,14 @@ class LauncherManager:
         prompt: str | None = None,
         **kwargs,
     ):
-        """Launch Claude with proper settings."""
+        """Launch the Claude CLI with continuation-friendly defaults.
+
+        Args:
+            cwd: Optional working directory for the launched process.
+            model: Optional Claude model identifier; defaults to Sonnet 4.
+            prompt: Optional prompt passed to Claude using ``--prompt``.
+            **kwargs: Ignored extras to keep the signature Fire-friendly.
+        """
         if not self.claude_cmd:
             logger.error(
                 "Claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code"
@@ -83,7 +103,15 @@ class LauncherManager:
         prompt: str | None = None,
         **kwargs,
     ):
-        """Launch Codex with proper settings."""
+        """Launch the Codex CLI with sensible defaults for continuation.
+
+        Args:
+            cwd: Optional working directory for the process.
+            profile: Optional Codex profile (``-m`` flag); defaults to ``gpt5``.
+            exec_mode: When ``True`` include ``-p``/``-e`` to enable exec mode.
+            prompt: Optional prompt appended as positional argument.
+            **kwargs: Ignored extras to keep the signature Fire-friendly.
+        """
         if not self.codex_cmd:
             logger.error("Codex CLI not found. Install with: brew install codex")
             sys.exit(1)
@@ -132,7 +160,13 @@ class LauncherManager:
         prompt: str | None = None,
         **kwargs,
     ):
-        """Launch Gemini with proper settings."""
+        """Launch the Gemini CLI with defaults matching continuation needs.
+
+        Args:
+            cwd: Optional working directory for the process.
+            prompt: Optional prompt appended to the command line.
+            **kwargs: Ignored extras to keep the signature Fire-friendly.
+        """
         if not self.gemini_cmd:
             logger.error("Gemini CLI not found. Install with: npm install -g @google/gemini-cli")
             sys.exit(1)
@@ -157,7 +191,7 @@ class LauncherManager:
 
 # Console script entry points
 def vocl():
-    """Direct launcher for Claude."""
+    """Console entry point that mirrors ``vocl`` behaviour."""
     launcher = LauncherManager()
     # Pass through all arguments
     import sys
@@ -168,7 +202,7 @@ def vocl():
 
 
 def voco():
-    """Direct launcher for Codex."""
+    """Console entry point that mirrors ``voco`` behaviour."""
     launcher = LauncherManager()
     import sys
 
@@ -198,7 +232,7 @@ def voco():
 
 
 def voge():
-    """Direct launcher for Gemini."""
+    """Console entry point that mirrors ``voge`` behaviour."""
     launcher = LauncherManager()
     import sys
 

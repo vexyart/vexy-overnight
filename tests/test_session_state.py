@@ -12,10 +12,10 @@ from vexy_overnight.session_state import SessionInfo, SessionStateManager
 
 
 class TestSessionInfo:
-    """Tests for SessionInfo dataclass."""
+    """Validate serialisation behaviour for :class:`SessionInfo`."""
 
     def test_session_info_creation(self):
-        """Test creating a SessionInfo."""
+        """Instantiating :class:`SessionInfo` stores provided field values."""
         info = SessionInfo(
             tool="claude", pid=12345, start_time="2025-09-21T10:00:00", cwd="/home/user/project"
         )
@@ -25,7 +25,7 @@ class TestSessionInfo:
         assert info.cwd == "/home/user/project"
 
     def test_to_dict(self):
-        """Test converting SessionInfo to dictionary."""
+        """``SessionInfo.to_dict`` produces a JSON-safe mapping."""
         info = SessionInfo(
             tool="codex", pid=54321, start_time="2025-09-21T11:00:00", cwd="/tmp/work"
         )
@@ -38,7 +38,7 @@ class TestSessionInfo:
         }
 
     def test_from_dict(self):
-        """Test creating SessionInfo from dictionary."""
+        """:meth:`SessionInfo.from_dict` reconstructs an equivalent instance."""
         data = {
             "tool": "gemini",
             "pid": 99999,
@@ -53,33 +53,33 @@ class TestSessionInfo:
 
 
 class TestSessionStateManager:
-    """Tests for SessionStateManager."""
+    """Exercise high-level behaviours of :class:`SessionStateManager`."""
 
     @pytest.fixture
     def temp_state_dir(self, tmp_path):
-        """Create a temporary state directory."""
+        """Return a temporary directory emulating the state storage location."""
         state_dir = tmp_path / ".vexy-overnight"
         state_dir.mkdir()
         return state_dir
 
     @pytest.fixture
     def manager(self, temp_state_dir):
-        """Create a SessionStateManager with temp directory."""
+        """Construct a manager instance backed by the temporary directory."""
         return SessionStateManager(state_dir=temp_state_dir)
 
     def test_init(self, temp_state_dir):
-        """Test SessionStateManager initialization."""
+        """Initialisation should derive ``session_state.json`` inside the directory."""
         manager = SessionStateManager(state_dir=temp_state_dir)
         assert manager.state_file == temp_state_dir / "session_state.json"
         assert manager.state_file.parent.exists()
 
     def test_read_session_no_file(self, manager):
-        """Test reading session when no file exists."""
+        """Reading without an existing file returns ``None``."""
         result = manager.read_session()
         assert result is None
 
     def test_write_and_read_session(self, manager):
-        """Test writing and reading a session."""
+        """Writing a session should persist it and make it readable."""
         # Write session
         session = manager.write_session("claude", 12345, "/tmp/project")
         assert session.tool == "claude"
@@ -94,14 +94,14 @@ class TestSessionStateManager:
         assert read_session.cwd == "/tmp/project"
 
     def test_read_corrupted_file(self, manager):
-        """Test reading a corrupted session file."""
+        """Corrupted JSON should be treated as an absent session."""
         # Write invalid JSON
         manager.state_file.write_text("invalid json")
         result = manager.read_session()
         assert result is None
 
     def test_clear_session(self, manager):
-        """Test clearing session state."""
+        """Clearing removes the session file and is idempotent."""
         # Write a session
         manager.write_session("codex", 54321)
         assert manager.state_file.exists()
@@ -116,7 +116,7 @@ class TestSessionStateManager:
     @patch("psutil.Process")
     @patch("psutil.pid_exists")
     def test_kill_old_session_success(self, mock_pid_exists, mock_Process, manager):
-        """Test successfully killing an old session."""
+        """Terminate a matching process and wait for it to exit cleanly."""
         # Setup mock process
         mock_process = MagicMock()
         mock_process.name.return_value = "claude"
@@ -132,7 +132,7 @@ class TestSessionStateManager:
 
     @patch("psutil.pid_exists")
     def test_kill_old_session_no_process(self, mock_pid_exists, manager):
-        """Test killing when process doesn't exist."""
+        """Return ``False`` when the recorded PID no longer exists."""
         mock_pid_exists.return_value = False
 
         session = SessionInfo("claude", 12345, "2025-09-21T10:00:00", "/tmp")
@@ -143,7 +143,7 @@ class TestSessionStateManager:
     @patch("psutil.Process")
     @patch("psutil.pid_exists")
     def test_kill_old_session_wrong_process(self, mock_pid_exists, mock_Process, manager):
-        """Test not killing unrelated process."""
+        """Do not touch processes whose names are unrelated to managed CLIs."""
         # Setup mock process with different name
         mock_process = MagicMock()
         mock_process.name.return_value = "notepad"
@@ -159,7 +159,7 @@ class TestSessionStateManager:
     @patch("psutil.Process")
     @patch("psutil.pid_exists")
     def test_kill_old_session_timeout(self, mock_pid_exists, mock_Process, manager):
-        """Test force kill on timeout."""
+        """Escalate to ``kill`` when terminate waits longer than the timeout."""
         # Import the real psutil to create the exception
         import psutil as real_psutil
 
@@ -181,7 +181,7 @@ class TestSessionStateManager:
         mock_process.kill.assert_called_once()
 
     def test_kill_old_session_no_psutil(self, manager):
-        """Test handling when psutil is not available."""
+        """Gracefully return ``False`` if :mod:`psutil` cannot be imported."""
         # Patch the import at the specific location in the module
         import builtins as builtins_mod
 
@@ -200,7 +200,7 @@ class TestSessionStateManager:
     @patch("psutil.Process")
     @patch("psutil.pid_exists")
     def test_rotate_session(self, mock_pid_exists, mock_Process, manager):
-        """Test rotating sessions."""
+        """Rotating writes new metadata and terminates the previous process."""
         # Setup mock for old process
         mock_process = MagicMock()
         mock_process.name.return_value = "claude"
@@ -221,7 +221,7 @@ class TestSessionStateManager:
         mock_process.terminate.assert_called_once()
 
     def test_rotate_session_no_kill(self, manager):
-        """Test rotating without killing old session."""
+        """Rotation with ``kill_old=False`` preserves the previous process."""
         # Write an old session
         manager.write_session("claude", 11111)
 

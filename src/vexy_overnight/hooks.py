@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/hooks.py
-"""Template-driven continuation hook management for vomgr."""
+"""Manage the lifecycle of continuation hook scripts.
+
+The :class:`HookManager` renders packaged templates into the user's home
+directory, creating helper scripts for Claude, Codex, and Gemini.  Hooks are
+idempotent and safe to re-run because installation overwrites existing files
+while uninstallation removes all generated artefacts.
+"""
 
 from __future__ import annotations
 
@@ -15,10 +21,16 @@ FORCE_DIRECT_ENV_KEY = "VOMGR_HOOK_FORCE_DIRECT"
 
 
 class HookManager:
-    """Manage installation and removal of continuation hook scripts."""
+    """Install and remove continuation helper scripts for supported CLIs.
+
+    The manager expands Jinja-less string templates shipped in
+    ``vexy_overnight.hooks_tpl``.  Each installation pass writes a launcher
+    (``*-go.py``), a helper script (``*-new.py``), and any accompanying JSON
+    configuration.
+    """
 
     def __init__(self) -> None:
-        """Initialise hook paths rooted at the user's HOME directory."""
+        """Derive canonical hook paths under the user's home directory."""
         home = Path.home()
         self.claude_dir = home / ".claude" / "hooks"
         self.claude_hook_path = self.claude_dir / "vocl-go.py"
@@ -34,13 +46,13 @@ class HookManager:
         self.gemini_hook_path = self.gemini_dir / "voge-go.py"
 
     def install_hooks(self) -> None:
-        """Install continuation hook scripts for all supported CLIs."""
+        """Render and install hook scripts for every supported CLI."""
         self._install_claude_hook()
         self._install_codex_hook()
         self._install_gemini_hook()
 
     def uninstall_hooks(self) -> None:
-        """Remove hook scripts and companions for all tools."""
+        """Remove all generated hook scripts and helper artefacts."""
         for path in (
             self.claude_hook_path,
             self.claude_helper_path,
@@ -53,7 +65,7 @@ class HookManager:
             self._remove_file(path)
 
     def _install_claude_hook(self) -> None:
-        """Install Claude continuation hook using packaged templates."""
+        """Render and write Claude-specific hook and helper scripts."""
         self.claude_dir.mkdir(parents=True, exist_ok=True)
         context = dict(
             source_tool="claude",
@@ -74,7 +86,7 @@ class HookManager:
         logger.debug("Installed Claude continuation hook at {}", self.claude_hook_path)
 
     def _install_codex_hook(self) -> None:
-        """Install Codex continuation hook using packaged templates."""
+        """Render and write Codex hook and helper scripts."""
         self.codex_dir.mkdir(parents=True, exist_ok=True)
         context = dict(
             source_tool="codex",
@@ -94,7 +106,7 @@ class HookManager:
         logger.debug("Installed Codex continuation hook at {}", self.codex_hook_path)
 
     def _install_gemini_hook(self) -> None:
-        """Install Gemini placeholder hook."""
+        """Render the placeholder Gemini hook script."""
         self.gemini_dir.mkdir(parents=True, exist_ok=True)
         self._write_template("voge_go.py", self.gemini_hook_path, {})
         logger.debug("Installed Gemini placeholder hook at {}", self.gemini_hook_path)
@@ -102,7 +114,16 @@ class HookManager:
     def _write_template(
         self, template_name: str, destination: Path, context: dict[str, str]
     ) -> None:
-        """Render a stored template and write it to destination."""
+        """Render a stored template and write the result to ``destination``.
+
+        Args:
+            template_name: Name of the file inside ``hooks_tpl``.
+            destination: Path where the rendered script should be stored.
+            context: Values interpolated into the template via ``str.format``.
+
+        Raises:
+            ValueError: If the provided context is missing required keys.
+        """
         template = resources.files(TEMPLATE_PACKAGE).joinpath(template_name)
         content = template.read_text(encoding="utf-8")
         try:
@@ -114,7 +135,11 @@ class HookManager:
 
     @staticmethod
     def _remove_file(path: Path) -> None:
-        """Delete path if it exists, logging the outcome."""
+        """Delete ``path`` if present and log the removal.
+
+        Args:
+            path: File path that may exist on disk.
+        """
         if not path.exists():
             return
         path.unlink()

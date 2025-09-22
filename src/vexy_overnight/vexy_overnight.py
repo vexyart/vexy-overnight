@@ -1,4 +1,4 @@
-"""Core processing utilities for vexy_overnight."""
+"""Legacy data summarisation helpers kept for backward compatibility."""
 # this_file: src/vexy_overnight/vexy_overnight.py
 
 from __future__ import annotations
@@ -31,6 +31,7 @@ class Config:
     options: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
+        """Validate ``options`` to ensure they are mapping-like with string keys."""
         if self.options is None:
             return
 
@@ -47,9 +48,23 @@ def process_data(
     *,
     debug: bool = False,
 ) -> Summary:
-    """Summarise a non-empty sequence of data points.
+    """Summarise ``data`` into a deterministic :class:`Summary` mapping.
 
-    Returns a stable dictionary containing basic metrics that tests can rely on.
+    Args:
+        data: Sequence of items to inspect; must not be empty.
+        config: Optional configuration whose metadata is surfaced in the
+            summary.
+        debug: When ``True`` emit debug-level logging while computing the
+            summary.
+
+    Returns:
+        Summary: Dictionary describing collection size, unique counts, type
+        distribution, and derived configuration metadata.
+
+    Raises:
+        TypeError: If ``data`` is not a sequence or ``config`` is not a
+            :class:`Config` instance.
+        ValueError: If ``data`` is empty.
     """
     if isinstance(data, str | bytes) or not isinstance(data, Sequence):
         raise TypeError("Input data must be a sequence of records")
@@ -96,7 +111,7 @@ def process_data(
 
 
 def main() -> None:
-    """Entry point used by packaging scripts and manual invocation."""
+    """Demonstrate :func:`process_data` by logging a simple summary."""
     sample = [1, 2, 3]
     config = Config(name="default", value="demo", options={"label": "sample"})
     summary = process_data(sample, config=config, debug=False)

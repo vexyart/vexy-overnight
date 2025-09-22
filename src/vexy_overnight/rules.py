@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/rules.py
-"""Instruction file synchronization for vomgr."""
+"""Synchronise and edit shared instruction files across CLI tools."""
 
 import os
 import subprocess
@@ -10,7 +10,14 @@ from loguru import logger
 
 
 class RulesManager:
-    """Manages instruction file synchronization."""
+    """Coordinate instruction file discovery and synchronisation tasks.
+
+    The manager operates on either the current working directory or the
+    user's global configuration directories, depending on ``global_mode``.
+    It provides helper methods invoked by CLI commands for syncing, appending,
+    searching, and replacing text across instruction files such as
+    ``CLAUDE.md`` or ``.cursorrules``.
+    """
 
     INSTRUCTION_FILES = [
         "CLAUDE.md",
@@ -22,10 +29,12 @@ class RulesManager:
     ]
 
     def __init__(self, global_mode: bool = False):
-        """Initialize rules manager.
+        """Create a manager with the desired search scope.
 
         Args:
-            global_mode: If True, operate on home directory configs
+            global_mode: When ``True`` operate on configuration directories in
+                the user's home folder; otherwise operate on the current
+                working directory only.
         """
         self.global_mode = global_mode
 
@@ -42,7 +51,12 @@ class RulesManager:
             self.search_paths = [Path.cwd()]
 
     def find_instruction_files(self) -> dict[str, list[Path]]:
-        """Find all instruction files in search paths."""
+        """Discover instruction files within the configured search paths.
+
+        Returns:
+            dict[str, list[Path]]: Mapping of file names to the paths discovered
+            for each name.
+        """
         files_by_name = {}
 
         for filename in self.INSTRUCTION_FILES:
@@ -69,12 +83,19 @@ class RulesManager:
         return files_by_name
 
     def _command_exists(self, cmd: str) -> bool:
-        """Check if command exists."""
+        """Return whether ``cmd`` resolves via ``which``.
+
+        Args:
+            cmd: Command name to probe for availability.
+
+        Returns:
+            bool: ``True`` if the tool exists on the current ``PATH``.
+        """
         result = subprocess.run(["which", cmd], capture_output=True)
         return result.returncode == 0
 
     def sync_files(self):
-        """Synchronize instruction files using hard links."""
+        """Synchronise instruction files by linking them to a common parent."""
         files_by_name = self.find_instruction_files()
 
         for filename, file_paths in files_by_name.items():
@@ -107,7 +128,15 @@ class RulesManager:
                             logger.warning(f"Failed to link {file_path}: {e2}")
 
     def _find_parent_file(self, file_paths: list[Path]) -> Path | None:
-        """Find the most recent non-empty file to use as parent."""
+        """Select the most recent non-empty file to use as the canonical copy.
+
+        Args:
+            file_paths: Candidate files discovered during syncing.
+
+        Returns:
+            Path | None: The chosen parent file or ``None`` if no suitable file
+            exists.
+        """
         valid_files = []
 
         for file_path in file_paths:
@@ -122,7 +151,11 @@ class RulesManager:
         return valid_files[0]
 
     def append_to_files(self, text: str):
-        """Append text to all instruction files."""
+        """Append ``text`` to the canonical copy of each instruction file.
+
+        Args:
+            text: Content to append, typically newline-delimited instructions.
+        """
         files_by_name = self.find_instruction_files()
 
         for filename, file_paths in files_by_name.items():
@@ -135,7 +168,15 @@ class RulesManager:
                 logger.info(f"Appended text to {filename}")
 
     def search_files(self, pattern: str) -> dict[str, list[str]]:
-        """Search for pattern in instruction files."""
+        """Search for ``pattern`` in each instruction file.
+
+        Args:
+            pattern: Substring to look for in the file contents.
+
+        Returns:
+            dict[str, list[str]]: Mapping of file name to matching lines with
+            location metadata.
+        """
         results = {}
         files_by_name = self.find_instruction_files()
 
@@ -164,7 +205,12 @@ class RulesManager:
         return results
 
     def replace_in_files(self, search_text: str, replace_text: str):
-        """Replace text in all instruction files."""
+        """Replace ``search_text`` with ``replace_text`` in instruction files.
+
+        Args:
+            search_text: Substring to be replaced.
+            replace_text: Replacement string written back to files.
+        """
         files_by_name = self.find_instruction_files()
         seen_inodes = set()
 

@@ -22,20 +22,48 @@ def fake_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def _write_json(path: Path, payload: dict) -> None:
+    """Persist ``payload`` as JSON to ``path`` creating parent directories.
+
+    Args:
+        path: Location to write.
+        payload: JSON-serialisable mapping.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload))
 
 
 def _write_toml(path: Path, payload: str) -> None:
+    """Persist raw TOML text to ``path`` creating parent directories.
+
+    Args:
+        path: Location to write.
+        payload: Raw TOML content.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(payload)
 
 
 def _read_json(path: Path) -> dict:
+    """Read JSON payload from ``path`` returning a dictionary.
+
+    Args:
+        path: File path to read.
+
+    Returns:
+        dict: Parsed JSON data.
+    """
     return json.loads(path.read_text())
 
 
 def _read_toml(path: Path) -> dict:
+    """Read TOML payload from ``path`` returning a dictionary.
+
+    Args:
+        path: File path to read.
+
+    Returns:
+        dict: Parsed TOML data.
+    """
     return tomli.loads(path.read_text())
 
 

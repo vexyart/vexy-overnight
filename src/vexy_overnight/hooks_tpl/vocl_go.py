@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/hooks_tpl/vocl_go.py
-"""Template for Claude continuation hook that spawns a fresh session."""
+"""Claude continuation hook template executed inside Claude CLI hooks."""
 
 from __future__ import annotations
 
@@ -31,7 +31,12 @@ FORCE_DIRECT_ENV_KEY = "{force_direct_env_key}"
 
 
 def read_payload() -> dict[str, Any]:
-    """Read JSON payload supplied on stdin, returning an empty dict on failure."""
+    """Return the hook payload streamed via stdin.
+
+    Returns:
+        dict[str, Any]: Parsed payload or an empty dictionary when stdin is
+        empty or deserialisation fails.
+    """
     try:
         raw = sys.stdin.read()
     except Exception:
@@ -45,7 +50,14 @@ def read_payload() -> dict[str, Any]:
 
 
 def determine_project_dir(payload: dict[str, Any]) -> Path:
-    """Select the project directory from env, payload, or current working directory."""
+    """Resolve the project directory using multiple fallbacks.
+
+    Args:
+        payload: Payload dictionary supplied by the Claude CLI hook.
+
+    Returns:
+        Path: Directory that should be considered the active project.
+    """
     env_value = os.environ.get(ENV_PROJECT_KEY)
     if env_value:
         path = Path(env_value).expanduser()
@@ -63,7 +75,11 @@ def determine_project_dir(payload: dict[str, Any]) -> Path:
 
 
 def _remove_stale_config(script_dir: Path) -> None:
-    """Drop a stale config file when continuation is disabled."""
+    """Delete persisted config if continuation is currently disabled.
+
+    Args:
+        script_dir: Directory containing the generated configuration file.
+    """
     config_path = script_dir / CONFIG_FILENAME
     if config_path.exists():
         try:
@@ -73,7 +89,7 @@ def _remove_stale_config(script_dir: Path) -> None:
 
 
 def main() -> None:
-    """Entry point for the Claude continuation hook."""
+    """Entry point invoked by Claude when the hook fires."""
     payload = read_payload()
     project_dir = determine_project_dir(payload)
     settings = load_settings()

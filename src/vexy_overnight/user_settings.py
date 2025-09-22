@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/user_settings.py
-"""User-configurable continuation settings for vomgr."""
+"""Load, validate, and persist user settings for continuation behaviour."""
 
 from __future__ import annotations
 
@@ -50,12 +50,16 @@ _DEFAULT_TERMINAL_DEFAULTS = {
 
 @dataclass
 class ContinuationPrefs:
+    """Describe whether continuation is enabled and the target tool."""
+
     enabled: bool
     target: str
 
 
 @dataclass
 class NotificationPrefs:
+    """Describe notification preferences for continuation events."""
+
     enabled: bool
     message: str
     sound: str
@@ -63,16 +67,21 @@ class NotificationPrefs:
 
 @dataclass
 class TerminalPrefs:
+    """Store terminal launch commands used by helper scripts."""
+
     defaults: dict[str, list[str]] = field(default_factory=dict)
     per_tool: dict[str, dict[str, list[str]]] = field(default_factory=dict)
 
     def command_for(self, tool: str, platform_key: str) -> list[str] | None:
+        """Return the terminal command sequence for ``tool`` on ``platform_key``."""
         tool_commands = self.per_tool.get(tool, {})
         return tool_commands.get(platform_key) or self.defaults.get(platform_key)
 
 
 @dataclass
 class UserSettings:
+    """Concrete settings object persisted to ``settings.toml``."""
+
     continuations: dict[str, ContinuationPrefs]
     prompts: dict[str, str]
     notifications: NotificationPrefs
@@ -81,6 +90,11 @@ class UserSettings:
 
     @classmethod
     def default(cls) -> UserSettings:
+        """Return a :class:`UserSettings` instance with packaged defaults.
+
+        Returns:
+            UserSettings: Settings initialised with bundled defaults.
+        """
         continuations = {
             "claude": ContinuationPrefs(True, "codex"),
             "codex": ContinuationPrefs(True, "claude"),
@@ -91,6 +105,12 @@ class UserSettings:
         return cls(continuations, _DEFAULT_PROMPTS.copy(), notifications, terminals, True)
 
     def validate(self) -> None:
+        """Ensure continuation targets and control flags are valid.
+
+        Raises:
+            ValueError: If continuation targets reference unknown tools or the
+                kill flag is not boolean.
+        """
         for source, prefs in self.continuations.items():
             if prefs.target not in CONTINUATION_TOOLS:
                 raise ValueError(f"unknown continuation target '{prefs.target}' for {source}")
@@ -98,6 +118,11 @@ class UserSettings:
             raise ValueError("kill_old_sessions must be boolean")
 
     def to_dict(self) -> dict[str, object]:
+        """Serialise the settings dataclass into a TOML-friendly mapping.
+
+        Returns:
+            dict[str, object]: Mapping ready to be written to ``settings.toml``.
+        """
         return {
             "continuations": {
                 tool: {"enabled": prefs.enabled, "target": prefs.target}
@@ -117,10 +142,26 @@ class UserSettings:
         }
 
     def prompt_for(self, tool: str) -> str:
+        """Return the prompt template for ``tool`` with fallbacks.
+
+        Args:
+            tool: Tool name to fetch the prompt for.
+
+        Returns:
+            str: Template string with curly brace placeholders.
+        """
         return self.prompts.get(tool) or self.prompts.get("claude") or "Continue"
 
     @classmethod
     def from_dict(cls, payload: dict[str, object]) -> UserSettings:
+        """Create :class:`UserSettings` from a mapping previously serialised.
+
+        Args:
+            payload: Deserialised TOML content.
+
+        Returns:
+            UserSettings: Fully populated settings instance.
+        """
         raw_cont = payload.get("continuations", {})
         continuations = {
             tool: ContinuationPrefs(
@@ -150,11 +191,27 @@ class UserSettings:
 
 
 def settings_path(home: Path | None = None) -> Path:
+    """Return the full path to ``settings.toml`` under ``home``.
+
+    Args:
+        home: Optional override directory; defaults to the current user's home.
+
+    Returns:
+        Path: Location of the settings file.
+    """
     base = home or Path.home()
     return base / SETTINGS_DIR_NAME / SETTINGS_FILE_NAME
 
 
 def load_user_settings(home: Path | None = None) -> UserSettings:
+    """Load user settings from disk, creating defaults on first run.
+
+    Args:
+        home: Optional home directory override.
+
+    Returns:
+        UserSettings: Persisted settings or freshly created defaults.
+    """
     path = settings_path(home)
     if not path.exists():
         settings = UserSettings.default()
@@ -166,6 +223,15 @@ def load_user_settings(home: Path | None = None) -> UserSettings:
 
 
 def save_user_settings(settings: UserSettings, home: Path | None = None) -> Path:
+    """Persist ``settings`` to disk, creating a timestamped backup first.
+
+    Args:
+        settings: Settings instance to write.
+        home: Optional home directory override.
+
+    Returns:
+        Path: Path to the written settings file.
+    """
     settings.validate()
     target = settings_path(home)
     target.parent.mkdir(parents=True, exist_ok=True)

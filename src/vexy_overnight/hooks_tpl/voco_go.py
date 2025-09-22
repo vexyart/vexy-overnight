@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/hooks_tpl/voco_go.py
-"""Template for Codex continuation hook that spawns a fresh session."""
+"""Codex continuation hook template executed inside Codex CLI hooks."""
 
 from __future__ import annotations
 
@@ -31,7 +31,12 @@ PROMPT_FALLBACK = "Continue working on the current task"
 
 
 def read_payload() -> dict[str, Any]:
-    """Return JSON payload supplied on stdin, or an empty mapping."""
+    """Return the JSON payload streamed to the hook via stdin.
+
+    Returns:
+        dict[str, Any]: Parsed payload or an empty dictionary when stdin is
+        empty or parsing fails.
+    """
     try:
         raw = sys.stdin.read()
     except Exception:
@@ -45,6 +50,14 @@ def read_payload() -> dict[str, Any]:
 
 
 def _ensure_path(value: str | None) -> Path | None:
+    """Expand ``value`` to a path if it exists on disk.
+
+    Args:
+        value: String path candidate or ``None``.
+
+    Returns:
+        Path | None: Expanded path when the directory exists.
+    """
     if not value:
         return None
     path = Path(value).expanduser()
@@ -54,6 +67,14 @@ def _ensure_path(value: str | None) -> Path | None:
 
 
 def _context_to_mapping(context: Any) -> dict[str, Any]:
+    """Normalise various context representations into a dictionary.
+
+    Args:
+        context: Raw context value from Codex payloads.
+
+    Returns:
+        dict[str, Any]: Dictionary representation with helpful keys.
+    """
     if isinstance(context, dict):
         return context
     if isinstance(context, str):
@@ -72,6 +93,11 @@ def _context_to_mapping(context: Any) -> dict[str, Any]:
 
 
 def _latest_session_directory() -> Path | None:
+    """Return the most recent Codex session working directory if available.
+
+    Returns:
+        Path | None: Directory parsed from session logs or ``None`` when absent.
+    """
     sessions_root = Path.home() / SESSIONS_RELATIVE
     if not sessions_root.exists():
         return None
@@ -99,7 +125,14 @@ def _latest_session_directory() -> Path | None:
 
 
 def determine_project_dir(payload: dict[str, Any]) -> Path:
-    """Infer Codex working directory from payload or session logs."""
+    """Infer the Codex working directory from payload, history, or defaults.
+
+    Args:
+        payload: Payload dictionary provided by the Codex hook.
+
+    Returns:
+        Path: Directory that should be used as the launch context.
+    """
     context = _context_to_mapping(payload.get("context"))
     candidate = context.get("cwd") or context.get("working_directory")
     project = _ensure_path(candidate if isinstance(candidate, str) else None)
@@ -124,6 +157,11 @@ def determine_project_dir(payload: dict[str, Any]) -> Path:
 
 
 def _remove_stale_config(script_dir: Path) -> None:
+    """Remove the generated configuration file when continuation is disabled.
+
+    Args:
+        script_dir: Directory containing the generated configuration file.
+    """
     config_path = script_dir / CONFIG_FILENAME
     if config_path.exists():
         try:
@@ -133,7 +171,7 @@ def _remove_stale_config(script_dir: Path) -> None:
 
 
 def main() -> None:
-    """Entry point for the Codex continuation hook."""
+    """Entry point invoked by Codex when the continuation hook fires."""
     payload = read_payload()
     project_dir = determine_project_dir(payload)
     settings = load_settings()

@@ -18,7 +18,11 @@ from vexy_overnight.user_settings import UserSettings, save_user_settings
 
 
 def _write_recording_stub(executable_path: Path) -> None:
-    """Create a stub CLI that records arguments, env hints, and PID."""
+    """Create a stub CLI that records arguments, env hints, and PID.
+
+    Args:
+        executable_path: Path where the stub script should be written.
+    """
     executable_path.write_text(
         """#!/usr/bin/env python3
 import json

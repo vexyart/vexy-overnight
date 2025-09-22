@@ -1,4 +1,5 @@
 # this_file: tests/test_vexy_overnight.py
+"""Regression tests for legacy summarisation helpers exposed by the package."""
 
 from __future__ import annotations
 
@@ -9,6 +10,7 @@ from loguru import logger
 
 
 def test_import_exposes_public_api() -> None:
+    """Importing the package should expose the documented public symbols."""
     import vexy_overnight as pkg
 
     assert {"__version__", "Config", "process_data"}.issubset(dir(pkg)), (
@@ -18,6 +20,7 @@ def test_import_exposes_public_api() -> None:
 
 
 def test_process_data_when_valid_input_then_returns_summary() -> None:
+    """Valid input sequences yield a populated summary mapping."""
     import vexy_overnight as pkg
 
     config = pkg.Config(name="numbers", value="unit-test")
@@ -32,6 +35,7 @@ def test_process_data_when_valid_input_then_returns_summary() -> None:
 
 
 def test_process_data_when_empty_input_then_raises_value_error() -> None:
+    """Empty sequences raise :class:`ValueError` to prevent undefined output."""
     import vexy_overnight as pkg
 
     with pytest.raises(ValueError, match="cannot be empty"):
@@ -42,6 +46,7 @@ def test_process_data_when_empty_input_then_raises_value_error() -> None:
 def test_process_data_when_non_sequence_like_input_then_raises_type_error(
     bad_input: object,
 ) -> None:
+    """Non-sequence inputs such as strings raise :class:`TypeError`."""
     import vexy_overnight as pkg
 
     with pytest.raises(TypeError, match="sequence"):
@@ -49,6 +54,7 @@ def test_process_data_when_non_sequence_like_input_then_raises_type_error(
 
 
 def test_process_data_when_config_options_then_copies_into_summary() -> None:
+    """Options mappings are copied to keep summaries isolated from inputs."""
     import vexy_overnight as pkg
 
     options: dict[str, str] = {"label": "dataset"}
@@ -61,6 +67,7 @@ def test_process_data_when_config_options_then_copies_into_summary() -> None:
 
 
 def test_process_data_when_options_mapping_proxy_then_copies_as_plain_dict() -> None:
+    """Mapping proxies are materialised into mutable dictionaries in the summary."""
     from types import MappingProxyType
 
     import vexy_overnight as pkg
@@ -78,6 +85,7 @@ def test_process_data_when_options_mapping_proxy_then_copies_as_plain_dict() -> 
 
 
 def test_process_data_when_option_value_deepcopy_fails_then_falls_back() -> None:
+    """Copy failures fallback to shallow copies or repr strings safely."""
     import vexy_overnight as pkg
 
     class FragileValue:
@@ -121,6 +129,7 @@ def test_process_data_when_option_value_deepcopy_fails_then_falls_back() -> None
 
 
 def test_process_data_when_tuple_and_deque_then_summary_remains_stable() -> None:
+    """Non-list sequences such as tuples or deques produce deterministic output."""
     from collections import deque
 
     import vexy_overnight as pkg
@@ -139,6 +148,7 @@ def test_process_data_when_tuple_and_deque_then_summary_remains_stable() -> None
 
 
 def test_process_data_when_config_not_config_instance_then_raises_type_error() -> None:
+    """:class:`TypeError` should be raised when ``config`` is not a ``Config`` instance."""
     import vexy_overnight as pkg
 
     class FakeConfig:
@@ -150,6 +160,7 @@ def test_process_data_when_config_not_config_instance_then_raises_type_error() -
 
 
 def test_process_data_when_debug_true_then_emits_debug_log() -> None:
+    """Debug flag should emit diagnostic logging to ``loguru`` sinks."""
     import vexy_overnight as pkg
 
     messages: list[str] = []
@@ -165,6 +176,7 @@ def test_process_data_when_debug_true_then_emits_debug_log() -> None:
 
 
 def test_main_when_called_then_logs_summary() -> None:
+    """Top-level ``main`` helper should log a completion summary."""
     import vexy_overnight.vexy_overnight as module
 
     messages: list[str] = []
@@ -185,6 +197,7 @@ def test_main_when_called_then_logs_summary() -> None:
     [([("key", "value")], "mapping"), ({1: "value"}, "string")],
 )
 def test_config_when_options_invalid_then_raises_type_error(options: object, match: str) -> None:
+    """Invalid option payloads for :class:`Config` constructor raise ``TypeError``."""
     import vexy_overnight as pkg
 
     with pytest.raises(TypeError, match=match):
@@ -192,6 +205,7 @@ def test_config_when_options_invalid_then_raises_type_error(options: object, mat
 
 
 def test_process_data_when_nested_options_then_summary_is_isolated() -> None:
+    """Nested mutable objects should be deep-copied to prevent aliasing."""
     import vexy_overnight as pkg
 
     options = {"nested": {"tags": ["a"]}}
@@ -209,6 +223,7 @@ def test_process_data_when_nested_options_then_summary_is_isolated() -> None:
 
 
 def test_process_data_summary_has_expected_keys() -> None:
+    """Summaries should expose the canonical set of keys for consumers."""
     import vexy_overnight as pkg
 
     summary: pkg.Summary = pkg.process_data([1, 2, 3])

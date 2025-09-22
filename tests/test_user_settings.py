@@ -20,7 +20,7 @@ from vexy_overnight.user_settings import (
 
 @pytest.fixture()
 def fake_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Provide isolated HOME directory for settings persistence tests."""
+    """Return a temporary HOME directory for settings persistence tests."""
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setattr(Path, "home", lambda: tmp_path)
     return tmp_path

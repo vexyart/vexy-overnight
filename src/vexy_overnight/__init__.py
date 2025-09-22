@@ -1,4 +1,18 @@
-"""Top-level package exports for vexy_overnight."""
+"""Public package interface for `vexy_overnight` utilities.
+
+This module exposes the primary entry points that consumers import when
+interacting with the Vexy Overnight Manager (``vomgr``).  Exports are grouped
+into two families:
+
+* Historical data helpers (``Config``, ``Summary``, ``process_data``) that are
+  maintained for backward compatibility with earlier releases of the package.
+* Modern management components (``ConfigManager`` and friends) that power the
+  consolidated CLI experience.
+
+The lazy import/``try`` block ensures older environments without the newer
+modules remain functional while we migrate all consumers to the streamlined
+tooling.
+"""
 # this_file: src/vexy_overnight/__init__.py
 
 from .__version__ import __version__
