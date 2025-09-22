@@ -81,32 +81,29 @@ class SessionStateManager:
         """Kill an old session process if it exists."""
         try:
             import psutil
+        except ImportError:
+            return False
 
-            # Check if process exists
+        try:
             if not psutil.pid_exists(session.pid):
                 return False
 
-            # Get process and verify it's one of our tools
             process = psutil.Process(session.pid)
             process_name = process.name().lower()
 
-            # Check if it's actually one of our managed tools
             if not any(tool in process_name for tool in ["claude", "codex", "gemini"]):
                 return False
 
-            # Terminate the process
             process.terminate()
 
-            # Wait for termination (max 5 seconds)
             try:
                 process.wait(timeout=5)
             except psutil.TimeoutExpired:
-                # Force kill if it didn't terminate gracefully
                 process.kill()
 
             return True
 
-        except (ImportError, psutil.NoSuchProcess, psutil.AccessDenied):
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
             return False
 
     def rotate_session(

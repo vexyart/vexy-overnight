@@ -1,234 +1,123 @@
 #!/usr/bin/env python3
 # this_file: src/vexy_overnight/hooks.py
-"""Continuation hook handlers for vomgr."""
+"""Template-driven continuation hook management for vomgr."""
 
+from __future__ import annotations
+
+import importlib.resources as resources
 from pathlib import Path
+from typing import Dict
 
 from loguru import logger
 
+TEMPLATE_PACKAGE = "vexy_overnight.hooks_tpl"
+TERMINAL_ENV_KEY = "VOMGR_TERMINAL_APP"
+FORCE_DIRECT_ENV_KEY = "VOMGR_HOOK_FORCE_DIRECT"
+
 
 class HookManager:
-    """Manages continuation hooks for Claude, Codex, and Gemini."""
+    """Manage installation and removal of continuation hook scripts."""
 
-    def __init__(self):
-        """Initialize hook manager."""
-        self.claude_hook_path = Path.home() / ".claude" / "hooks" / "vocl-go.py"
-        self.codex_hook_path = Path.home() / ".codex" / "voco-go.py"
-        self.gemini_hook_path = Path.home() / ".gemini" / "voge-go.py"
+    def __init__(self) -> None:
+        """Initialise hook paths rooted at the user's HOME directory."""
+        home = Path.home()
+        self.claude_dir = home / ".claude" / "hooks"
+        self.claude_hook_path = self.claude_dir / "vocl-go.py"
+        self.claude_helper_path = self.claude_dir / "vocl-new.py"
+        self.claude_config_name = "vocl-new.json"
 
-    def install_hooks(self):
-        """Install all continuation hooks."""
+        self.codex_dir = home / ".codex"
+        self.codex_hook_path = self.codex_dir / "voco-go.py"
+        self.codex_helper_path = self.codex_dir / "voco-new.py"
+        self.codex_config_name = "voco-new.json"
+
+        self.gemini_dir = home / ".gemini"
+        self.gemini_hook_path = self.gemini_dir / "voge-go.py"
+
+    def install_hooks(self) -> None:
+        """Install continuation hook scripts for all supported CLIs."""
         self._install_claude_hook()
         self._install_codex_hook()
         self._install_gemini_hook()
 
-    def uninstall_hooks(self):
-        """Remove all continuation hooks."""
-        for hook_path in [self.claude_hook_path, self.codex_hook_path, self.gemini_hook_path]:
-            if hook_path.exists():
-                hook_path.unlink()
-                logger.debug(f"Removed hook: {hook_path}")
+    def uninstall_hooks(self) -> None:
+        """Remove hook scripts and companions for all tools."""
+        for path in (
+            self.claude_hook_path,
+            self.claude_helper_path,
+            self.claude_dir / self.claude_config_name,
+            self.codex_hook_path,
+            self.codex_helper_path,
+            self.codex_dir / self.codex_config_name,
+            self.gemini_hook_path,
+        ):
+            self._remove_file(path)
 
-    def _install_claude_hook(self):
-        """Install simplified Claude continuation hook."""
-        hook_content = '''#!/usr/bin/env python3
-"""Simplified Claude continuation hook - vocl-go."""
+    def _install_claude_hook(self) -> None:
+        """Install Claude continuation hook using packaged templates."""
+        self.claude_dir.mkdir(parents=True, exist_ok=True)
+        context = dict(
+            source_tool="claude",
+            cli_executable="claude",
+            new_script_name=self.claude_helper_path.name,
+            config_filename=self.claude_config_name,
+            env_project_key="CLAUDE_PROJECT_DIR",
+            prompt_fallback="Continue working on the current task",
+            terminal_env_key=TERMINAL_ENV_KEY,
+            force_direct_env_key=FORCE_DIRECT_ENV_KEY,
+        )
+        self._write_template("vocl_go.py", self.claude_hook_path, context)
+        self._write_template(
+            "vocl_new.py",
+            self.claude_helper_path,
+            dict(config_filename=self.claude_config_name),
+        )
+        logger.debug("Installed Claude continuation hook at {}", self.claude_hook_path)
 
-import json
-import os
-import subprocess
-import sys
-from pathlib import Path
+    def _install_codex_hook(self) -> None:
+        """Install Codex continuation hook using packaged templates."""
+        self.codex_dir.mkdir(parents=True, exist_ok=True)
+        context = dict(
+            source_tool="codex",
+            cli_executable="codex",
+            new_script_name=self.codex_helper_path.name,
+            config_filename=self.codex_config_name,
+            sessions_relative=".codex/sessions",
+            terminal_env_key=TERMINAL_ENV_KEY,
+            force_direct_env_key=FORCE_DIRECT_ENV_KEY,
+        )
+        self._write_template("voco_go.py", self.codex_hook_path, context)
+        self._write_template(
+            "voco_new.py",
+            self.codex_helper_path,
+            dict(config_filename=self.codex_config_name),
+        )
+        logger.debug("Installed Codex continuation hook at {}", self.codex_hook_path)
 
+    def _install_gemini_hook(self) -> None:
+        """Install Gemini placeholder hook."""
+        self.gemini_dir.mkdir(parents=True, exist_ok=True)
+        self._write_template("voge_go.py", self.gemini_hook_path, {})
+        logger.debug("Installed Gemini placeholder hook at {}", self.gemini_hook_path)
 
-def main():
-    """Handle Claude Stop hook continuation."""
-    # Parse JSON input from stdin
-    try:
-        payload = json.load(sys.stdin)
-        session_id = payload.get("session_id", "")
-        transcript_path = payload.get("transcript_path", "")
-    except Exception:
-        # Fallback to basic continuation
-        session_id = ""
-        transcript_path = ""
+    def _write_template(self, template_name: str, destination: Path, context: Dict[str, str]) -> None:
+        """Render a stored template and write it to destination."""
+        template = resources.files(TEMPLATE_PACKAGE).joinpath(template_name)
+        content = template.read_text(encoding="utf-8")
+        try:
+            rendered = content.format(**context)
+        except KeyError as error:
+            raise ValueError(f"Missing template context value: {error}") from error
+        destination.write_text(rendered, encoding="utf-8")
+        destination.chmod(0o755)
 
-    # Get project directory
-    project_dir = os.environ.get("CLAUDE_PROJECT_DIR", os.getcwd())
-
-    # Generate continuation prompt from TODO.md/PLAN.md if they exist
-    prompt_parts = []
-    todo_path = Path(project_dir) / "TODO.md"
-    plan_path = Path(project_dir) / "PLAN.md"
-
-    if todo_path.exists():
-        with open(todo_path, "r") as f:
-            content = f.read()
-            uncompleted = [line for line in content.split("\\n") if line.startswith("- [ ]")]
-            if uncompleted:
-                prompt_parts.append(f"Continue with TODO items:\\n" + "\\n".join(uncompleted[:5]))
-
-    if plan_path.exists() and not prompt_parts:
-        with open(plan_path, "r") as f:
-            content = f.read()
-            prompt_parts.append("Continue with the plan in PLAN.md")
-
-    if not prompt_parts:
-        prompt_parts.append("Continue working on the current task")
-
-    prompt = " ".join(prompt_parts)
-
-    # Launch new Claude session
-    cmd = ["claude", "--continue", "--dangerously-skip-permissions"]
-
-    if prompt:
-        cmd.extend(["--prompt", prompt])
-
-    try:
-        subprocess.run(cmd, cwd=project_dir)
-    except Exception as e:
-        print(f"Failed to launch Claude: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
-'''
-        self.claude_hook_path.parent.mkdir(parents=True, exist_ok=True)
-        self.claude_hook_path.write_text(hook_content)
-        self.claude_hook_path.chmod(0o755)
-        logger.debug(f"Installed Claude hook: {self.claude_hook_path}")
-
-    def _install_codex_hook(self):
-        """Install simplified Codex continuation hook."""
-        hook_content = '''#!/usr/bin/env python3
-"""Simplified Codex continuation hook - voco-go."""
-
-import json
-import os
-import subprocess
-import sys
-from pathlib import Path
+    @staticmethod
+    def _remove_file(path: Path) -> None:
+        """Delete path if it exists, logging the outcome."""
+        if not path.exists():
+            return
+        path.unlink()
+        logger.debug("Removed hook artefact {}", path)
 
 
-def find_working_directory(payload):
-    """Extract working directory from Codex context."""
-    # Try to get from context payload
-    context = payload.get("context", {})
-    if isinstance(context, str):
-        text = context.strip()
-        if text:
-            try:
-                parsed = json.loads(text)
-            except json.JSONDecodeError:
-                return text
-            else:
-                if isinstance(parsed, dict):
-                    context = parsed
-                else:
-                    return text
-        else:
-            context = {}
-    if isinstance(context, dict):
-        cwd = context.get("cwd") or context.get("working_directory")
-        if cwd:
-            return cwd
-
-    # Try to find from session logs
-    sessions_dir = Path.home() / ".codex" / "sessions"
-    if sessions_dir.exists():
-        # Find most recent session file
-        session_files = sorted(sessions_dir.glob("*.jsonl"), key=lambda x: x.stat().st_mtime, reverse=True)
-        if session_files:
-            try:
-                with open(session_files[0], "r") as f:
-                    for line in f:
-                        entry = json.loads(line)
-                        if "cwd" in entry:
-                            return entry["cwd"]
-            except Exception:
-                pass
-
-    # Fallback to environment or current directory
-    return os.environ.get("PWD", os.getcwd())
-
-
-def main():
-    """Handle Codex notify hook continuation."""
-    # Parse JSON input from stdin
-    try:
-        payload = json.load(sys.stdin)
-    except Exception:
-        payload = {}
-
-    # Find working directory
-    project_dir = find_working_directory(payload)
-
-    # Generate continuation prompt from TODO.md/PLAN.md
-    prompt_parts = []
-    todo_path = Path(project_dir) / "TODO.md"
-    plan_path = Path(project_dir) / "PLAN.md"
-
-    if todo_path.exists():
-        with open(todo_path, "r") as f:
-            content = f.read()
-            uncompleted = [line for line in content.split("\\n") if line.startswith("- [ ]")]
-            if uncompleted:
-                prompt_parts.append(f"Continue with TODO items:\\n" + "\\n".join(uncompleted[:5]))
-
-    if plan_path.exists() and not prompt_parts:
-        with open(plan_path, "r") as f:
-            prompt_parts.append("Continue with the plan in PLAN.md")
-
-    if not prompt_parts:
-        prompt_parts.append("Continue working on the current task")
-
-    prompt = " ".join(prompt_parts)
-
-    # Launch Codex with continuation
-    cmd = [
-        "codex",
-        f"--cd={project_dir}",
-        "--dangerously-bypass-approvals-and-sandbox",
-        "--sandbox", "danger-full-access",
-        prompt
-    ]
-
-    try:
-        subprocess.run(cmd)
-    except Exception as e:
-        print(f"Failed to launch Codex: {e}", file=sys.stderr)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
-'''
-        self.codex_hook_path.parent.mkdir(parents=True, exist_ok=True)
-        self.codex_hook_path.write_text(hook_content)
-        self.codex_hook_path.chmod(0o755)
-        logger.debug(f"Installed Codex hook: {self.codex_hook_path}")
-
-    def _install_gemini_hook(self):
-        """Install placeholder Gemini continuation hook."""
-        hook_content = '''#!/usr/bin/env python3
-"""Placeholder Gemini continuation hook - voge-go."""
-
-import sys
-from loguru import logger
-
-
-def main():
-    """Placeholder for Gemini continuation - not yet implemented."""
-    logger.info("Gemini continuation hook called but not yet implemented")
-    print("Gemini continuation not yet implemented. Check for updates.", file=sys.stderr)
-    sys.exit(0)
-
-
-if __name__ == "__main__":
-    main()
-'''
-        self.gemini_hook_path.parent.mkdir(parents=True, exist_ok=True)
-        self.gemini_hook_path.write_text(hook_content)
-        self.gemini_hook_path.chmod(0o755)
-        logger.debug(f"Installed Gemini hook: {self.gemini_hook_path}")
+__all__ = ["HookManager"]

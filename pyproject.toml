@@ -122,6 +122,7 @@ build-backend = 'hatchling.build' # Specifies Hatchling as the build backend
 include = [
     "src/vexy_overnight/py.typed", # For better type checking support
     "src/vexy_overnight/data/**/*", # Include data files if any
+    "src/vexy_overnight/hooks_tpl/**/*", # Hook templates consumed during installation
 
 ]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/.mypy_cache"]

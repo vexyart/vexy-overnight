@@ -2,6 +2,11 @@
 this_file: CHANGELOG.md
 ---
 
+## 2025-09-22 - Verification Sweep & Status Report
+- Ran `python -m pytest -xvs` (91 passed) to confirm current baseline.
+- Ran `python -m pytest --cov=. --cov-report=term-missing` (91 passed, 60% overall coverage; below 70% target).
+- Logged results in `WORK.md` and left Issue 101/102 tasks open pending implementation.
+
 ## 2025-09-21 - Session State Management & Testing Progress (Issues 101 & 102)
 
 ### Phase C Progress (Issue 101)
@@ -38,6 +43,13 @@ this_file: CHANGELOG.md
 - **Documentation**: Updated README.md with usage examples and requirements
 - **Performance improvement**: <2s execution time vs complex original implementation
 - **Simplified error handling**: Basic try/catch with clear error messages
+
+## 2025-09-22 - Issue 106 Hook Template Overhaul
+- **Template-driven hooks**: Replaced string-embedded scripts with packaged templates in `src/vexy_overnight/hooks_tpl/` rendered by `HookManager`.
+- **Launcher companions**: Added helper scripts and JSON config pipeline to spawn new Claude/Codex sessions in fresh terminals with OS-aware fallbacks.
+- **Test adjustments**: Updated hook tests to exercise the new workflow and config files while enabling direct execution for CI.
+- **Session management fix**: Hardened `SessionStateManager.kill_old_session` against missing `psutil`, ensuring graceful failure and green tests.
+- **Packaging update**: Included `hooks_tpl` resources in `pyproject.toml` so templates ship with the package.
 - **Migration path**: Analyzed and documented transition from 448-line external script
 
 ### Technical Details

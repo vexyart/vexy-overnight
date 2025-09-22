@@ -15,3 +15,9 @@ this_file: WORK.md
 ## Upcoming Test Runs
 - `python -m pytest -xvs`
 - `python -m pytest --cov=src --cov-report=term-missing`
+
+## 2025-09-22
+- Implemented Issue 106 hook templating with launcher scripts and terminal spawn fallbacks.
+- Fixed `SessionStateManager.kill_old_session` handling for missing `psutil` to satisfy tests.
+- Tests: `python -m pytest -xvs` ✅
+- Verification sweep: python -m pytest -xvs ✅ (91 passed); python -m pytest --cov=. --cov-report=term-missing ✅ (91 passed, 60% overall coverage).

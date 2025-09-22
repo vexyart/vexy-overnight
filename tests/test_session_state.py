@@ -183,7 +183,9 @@ class TestSessionStateManager:
     def test_kill_old_session_no_psutil(self, manager):
         """Test handling when psutil is not available."""
         # Patch the import at the specific location in the module
-        original_import = __builtins__.__import__
+        import builtins as builtins_mod
+
+        original_import = builtins_mod.__import__
 
         def mock_import(name, *args, **kwargs):
             if name == "psutil":
