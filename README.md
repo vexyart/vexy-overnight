@@ -1,5 +1,7 @@
 # Vexy Overnight Manager (vomgr)
 
+**Documentation:** https://vexy.dev/vexy-overnight/
+
 A unified management tool for AI assistant CLIs (Claude, Codex, Gemini), providing streamlined launching, automated continuation workflows, and configuration synchronization.
 
 ## Overview

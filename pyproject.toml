@@ -11,10 +11,11 @@
 #------------------------------------------------------------------------------
 [project]
 name = 'vexy-overnight' # Package name on PyPI
-description = '' # Short description
+description = 'Launch Claude, Codex and Gemini CLIs, hand a finished session over to the next tool, and keep instruction files in sync' # Short description
 readme = 'README.md' # Path to README file
 requires-python = '>=3.10' # Minimum Python version
 keywords = [
+    'ai', 'cli', 'claude', 'codex', 'gemini', 'hooks', 'automation', 'agents', 'llm'
 ] # Keywords for PyPI search
 dynamic = ["version"] # Fields set dynamically at build time
 
@@ -42,6 +43,10 @@ dependencies = [
 
 # Author information
 [[project.authors]]
+name = 'Adam Twardoch'
+email = 'adam+github@twardoch.com'
+
+[[project.authors]]
 name = 'Fontlab Ltd'
 email = 'opensource@vexy.art'
 
@@ -51,9 +56,10 @@ text = 'MIT'
 
 # Project URLs
 [project.urls]
-Documentation = 'https://github.com/vexyart/vexy-overnight#readme'
+Documentation = 'https://vexy.dev/vexy-overnight/'
+Homepage = 'https://vexy.dev/vexy-overnight/'
+Repository = 'https://github.com/vexyart/vexy-overnight'
 Issues = 'https://github.com/vexyart/vexy-overnight/issues'
-Source = 'https://github.com/vexyart/vexy-overnight'
 
 #------------------------------------------------------------------------------
 # OPTIONAL DEPENDENCIES
@@ -118,18 +124,23 @@ build-backend = 'hatchling.build' # Specifies Hatchling as the build backend
 # how to handle versioning.
 #------------------------------------------------------------------------------
 [tool.hatch.build]
-# Include package data files
-include = [
-    "src/vexy_overnight/py.typed", # For better type checking support
-    "src/vexy_overnight/data/**/*", # Include data files if any
-    "src/vexy_overnight/hooks_tpl/**/*", # Hook templates consumed during installation
-
-]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/.mypy_cache"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/vexy_overnight"]
+packages = ["src/vexy_overnight"] # includes py.typed and the hooks_tpl/ templates
 reproducible = true
+
+# Source distribution: ship the package, tests and project metadata only
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/vexy_overnight",
+    "tests",
+    "README.md",
+    "CHANGELOG.md",
+    "DEPENDENCIES.md",
+    "LICENSE",
+    "pyproject.toml",
+]
 
 
 # Version control system hook configuration

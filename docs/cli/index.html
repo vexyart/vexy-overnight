@@ -1,0 +1,1402 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Launch Claude, Codex and Gemini CLIs, hand a finished session to the next tool, and keep instruction files in sync">
+      
+      
+      
+        <link rel="canonical" href="https://vexy.dev/vexy-overnight/cli/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../launchers/">
+      
+      
+        
+      
+      
+      
+      
+        
+        
+        
+          <link rel="icon" href="../assets/images/favicon.png">
+        
+      
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-materialx-10.1.8">
+    
+    
+      
+        <title>vomgr reference - vexy-overnight</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.314bbef5.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a45159b5.min.css">
+      
+    
+    
+
+    
+
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo" data-mx-topbar="glass">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="toc" type="checkbox" id="__toc" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__toc"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#vomgr-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="vexy-overnight" class="md-header__button md-logo" aria-label="vexy-overnight" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            vexy-overnight
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              vomgr reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.25 2a8.25 8.25 0 0 1 6.34 13.53l5.69 5.69a.749.749 0 0 1-.326 1.275.75.75 0 0 1-.734-.215l-5.69-5.69A8.25 8.25 0 1 1 10.25 2M3.5 10.25a6.75 6.75 0 1 0 13.5 0 6.75 6.75 0 0 0-13.5 0"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0">
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/vexyart/vexy-overnight" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vexyart/vexy-overnight
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="vexy-overnight" class="md-nav__button md-logo" aria-label="vexy-overnight" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    vexy-overnight
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/vexyart/vexy-overnight" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    vexyart/vexy-overnight
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list">
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vomgr reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vomgr reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc">
+      
+        <li class="md-nav__item">
+  <a href="#conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conventions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uninstall
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-disable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        enable, disable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running assistants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running assistants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instruction-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instruction files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preference-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preference groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preference groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#continuation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        continuation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        terminal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../launchers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Launchers and version-bump
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../continuation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How continuation works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instruction files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc">
+      
+        <li class="md-nav__item">
+  <a href="#conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conventions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup commands
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Setup commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        install
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uninstall" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uninstall
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-disable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        enable, disable
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        version
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-assistants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running assistants
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running assistants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        run
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instruction-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Instruction files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        update
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#preference-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Preference groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Preference groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#continuation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        continuation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        prompt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        terminal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<h1 id="vomgr-reference">vomgr reference<a class="headerlink" href="#vomgr-reference" title="Permanent link">&para;</a></h1>
+<p><code>vomgr</code> is built with <a href="https://github.com/google/python-fire">Python Fire</a> from the <code>VomgrCLI</code> class in <code>src/vexy_overnight/cli.py</code>. Run <code>vomgr</code> with no arguments to list the commands and groups.</p>
+<h2 id="conventions">Conventions<a class="headerlink" href="#conventions" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Tool names are <code>claude</code>, <code>codex</code> and <code>gemini</code>, in any letter case. Any other name fails with <code>tool must be one of claude, codex, gemini</code>.</li>
+<li>Flag names use underscores, as in the source: <code>--backup_legacy</code>, <code>--self_update</code>, <code>--global_mode</code>. Fire also accepts hyphens (<code>--dry-run</code>).</li>
+<li>Boolean flags switch on by name: <code>--check</code>. Positional arguments can also be given by name: <code>vomgr run claude</code> equals <code>vomgr run --tool=claude</code>.</li>
+<li>Commands return text or data; Fire prints it.</li>
+<li>To see a command's flags without running it, write <code>vomgr &lt;command&gt; -- --help</code>.</li>
+</ul>
+<h2 id="setup-commands">Setup commands<a class="headerlink" href="#setup-commands" title="Permanent link">&para;</a></h2>
+<h3 id="install">install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>vomgr<span class="w"> </span>install<span class="w"> </span><span class="o">[</span>--backup_legacy<span class="o">]</span><span class="w"> </span><span class="o">[</span>--migrate<span class="o">]</span>
+</code></pre></div>
+<ol>
+<li>With <code>--backup_legacy</code>: back up <code>~/.claude/settings.json</code>, <code>~/.codex/config.toml</code> and <code>~/.gemini/config.json</code> if they exist.</li>
+<li>Write the hook scripts into <code>~/.claude/hooks/</code>, <code>~/.codex/</code> and <code>~/.gemini/</code>. Existing copies are overwritten.</li>
+<li>With <code>--migrate</code>: replace hook commands that mention <code>claude4ever.py</code> or <code>codex4ever.py</code> with the new scripts. Without it: create <code>~/.claude/settings.json</code> (<code>{}</code>) and <code>~/.codex/config.toml</code> (empty) if they are missing.</li>
+</ol>
+<p>Output: one line per step, ending with <code>Installation complete</code>.</p>
+<h3 id="uninstall">uninstall<a class="headerlink" href="#uninstall" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>vomgr<span class="w"> </span>uninstall
+</code></pre></div>
+<p>Delete the hook scripts and their pending JSON files, then remove the Claude <code>Stop</code> hook and the Codex <code>notify</code> entry. Output: <code>Hooks removed</code> and <code>Configurations restored to defaults</code>.</p>
+<h3 id="enable-disable">enable, disable<a class="headerlink" href="#enable-disable" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>vomgr<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>claude<span class="w">      </span><span class="c1"># set the Stop hook in ~/.claude/settings.json</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>vomgr<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>codex<span class="w">       </span><span class="c1"># set notify in ~/.codex/config.toml</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>vomgr<span class="w"> </span>disable<span class="w"> </span>claude<span class="w">     </span><span class="c1"># remove the Stop hook</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>vomgr<span class="w"> </span>disable<span class="w"> </span>codex<span class="w">      </span><span class="c1"># remove notify</span>
+</code></pre></div>
+<p><code>enable</code> replaces the whole <code>Stop</code> hook list or <code>notify</code> value. <code>disable</code> removes them, and also removes the <code>hooks</code> table when it becomes empty. For <code>gemini</code>, both print <code>Gemini continuation not yet implemented</code>.</p>
+<p>Each change is written with a backup and a check: the file is copied to <code>&lt;name&gt;.backup.&lt;YYYYMMDD_HHMMSS&gt;</code>, the new content is written to <code>&lt;name&gt;.tmp</code>, parsed again, and only then moved over the original. If any step fails, the backup is restored.</p>
+<h3 id="status">status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>vomgr<span class="w"> </span>status
+</code></pre></div>
+<p>Whether the Claude and Codex hooks point at the <code>vexy-overnight</code> scripts, and whether <code>claude</code>, <code>codex</code> and <code>gemini</code> are found on <code>PATH</code>.</p>
+<h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>vomgr<span class="w"> </span>version
+</code></pre></div>
+<p>Print the package version.</p>
+<h2 id="running-assistants">Running assistants<a class="headerlink" href="#running-assistants" title="Permanent link">&para;</a></h2>
+<h3 id="run">run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>vomgr<span class="w"> </span>run<span class="w"> </span>claude<span class="w"> </span><span class="o">[</span>--cwd<span class="o">=</span>DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--model<span class="o">=</span>NAME<span class="o">]</span><span class="w"> </span><span class="o">[</span>--prompt<span class="o">=</span>TEXT<span class="o">]</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>vomgr<span class="w"> </span>run<span class="w"> </span>codex<span class="w">  </span><span class="o">[</span>--cwd<span class="o">=</span>DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--profile<span class="o">=</span>NAME<span class="o">]</span><span class="w"> </span><span class="o">[</span>--prompt<span class="o">=</span>TEXT<span class="o">]</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>vomgr<span class="w"> </span>run<span class="w"> </span>gemini<span class="w"> </span><span class="o">[</span>--cwd<span class="o">=</span>DIR<span class="o">]</span><span class="w"> </span><span class="o">[</span>--prompt<span class="o">=</span>TEXT<span class="o">]</span>
+</code></pre></div>
+<p>Start an assistant in the foreground and wait for it to exit. The commands it builds are the same as for <code>vocl</code>, <code>voco</code> and <code>voge</code>; see <a href="../launchers/">Launchers</a>. <code>--model</code> applies to Claude only and <code>--profile</code> to Codex only. After the assistant exits, <code>vomgr</code> prints <code>Launched &lt;tool&gt;</code>.</p>
+<p>If the assistant's command is not found, <code>vomgr</code> logs an install hint and exits with <code>1</code>.</p>
+<h2 id="instruction-files">Instruction files<a class="headerlink" href="#instruction-files" title="Permanent link">&para;</a></h2>
+<h3 id="rules">rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>vomgr<span class="w"> </span>rules<span class="w"> </span>--sync
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>vomgr<span class="w"> </span>rules<span class="w"> </span>--append<span class="o">=</span><span class="s2">"Always run the tests before committing."</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>vomgr<span class="w"> </span>rules<span class="w"> </span>--search<span class="o">=</span><span class="s2">"ruff"</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>vomgr<span class="w"> </span>rules<span class="w"> </span>--replace<span class="o">=</span><span class="s1">'["old text", "new text"]'</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>vomgr<span class="w"> </span>rules<span class="w"> </span>--sync<span class="w"> </span>--global_mode
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--sync</code></td>
+<td>Link all copies of each instruction file to the most recently changed one</td>
+</tr>
+<tr>
+<td><code>--append=TEXT</code></td>
+<td>Append <code>TEXT</code> to the most recent copy of each instruction file</td>
+</tr>
+<tr>
+<td><code>--search=TEXT</code></td>
+<td>Count lines containing <code>TEXT</code> in each instruction file</td>
+</tr>
+<tr>
+<td><code>--replace=[OLD, NEW]</code></td>
+<td>Replace <code>OLD</code> with <code>NEW</code> in every copy</td>
+</tr>
+<tr>
+<td><code>--global_mode</code></td>
+<td>Work on the assistants' home directories instead of the current directory</td>
+</tr>
+</tbody>
+</table>
+<p>Flags can be combined; the actions run in the order of the table. With no action flag, the output is <code>No rules action performed</code>. See <a href="../rules/">Instruction files</a> for what each action does to the files.</p>
+<h2 id="updates">Updates<a class="headerlink" href="#updates" title="Permanent link">&para;</a></h2>
+<h3 id="update">update<a class="headerlink" href="#update" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>vomgr<span class="w"> </span>update<span class="w"> </span>--check
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>vomgr<span class="w"> </span>update<span class="w"> </span>--cli<span class="w"> </span><span class="o">[</span>--dry_run<span class="o">]</span><span class="w"> </span><span class="o">[</span>--skip<span class="o">=</span><span class="s1">'["llxprt", "qwen"]'</span><span class="o">]</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>vomgr<span class="w"> </span>update<span class="w"> </span>--self_update<span class="w"> </span><span class="o">[</span>--dry_run<span class="o">]</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>vomgr<span class="w"> </span>update<span class="w"> </span>--all
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--check</code></td>
+<td>Print <code>tool: current -&gt; available</code> for <code>claude</code>, <code>codex</code>, <code>gemini</code> and <code>vexy-overnight</code></td>
+</tr>
+<tr>
+<td><code>--cli</code></td>
+<td>Update the assistant CLIs (see below)</td>
+</tr>
+<tr>
+<td><code>--self_update</code></td>
+<td>Upgrade the <code>vexy-overnight</code> package</td>
+</tr>
+<tr>
+<td><code>--all</code></td>
+<td><code>--cli</code> and <code>--self_update</code></td>
+</tr>
+<tr>
+<td><code>--dry_run</code></td>
+<td>Log what would run, change nothing</td>
+</tr>
+<tr>
+<td><code>--skip</code></td>
+<td>List of tool names to leave out of <code>--cli</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>--cli</code> runs <code>npm install -g</code> for each of these packages, then <code>brew update</code> and <code>brew upgrade codex</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>npm package</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>claude</code></td>
+<td><code>@anthropic-ai/claude-code@latest</code></td>
+</tr>
+<tr>
+<td><code>gemini</code></td>
+<td><code>@google/gemini-cli@nightly</code></td>
+</tr>
+<tr>
+<td><code>llxprt</code></td>
+<td><code>@vybestack/llxprt-code@nightly</code></td>
+</tr>
+<tr>
+<td><code>qwen</code></td>
+<td><code>@qwen-code/qwen-code@nightly</code></td>
+</tr>
+<tr>
+<td><code>terragon</code></td>
+<td><code>@terragon-labs/cli@latest</code></td>
+</tr>
+<tr>
+<td><code>justevery</code></td>
+<td><code>@just-every/code@latest</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>--self_update</code> runs <code>uv pip install --upgrade vexy-overnight</code> if <code>uv</code> is on <code>PATH</code>, otherwise <code>python -m pip install --upgrade vexy-overnight</code> with the Python that runs <code>vomgr</code>.</p>
+<p>The before and after versions of an update are appended to <code>~/.vexy-overnight/update.log</code>.</p>
+<p><code>--check</code> reports <code>available</code> as <code>latest</code> for Claude and <code>nightly</code> for Gemini; it does not look these up. For Codex it asks Homebrew; for <code>vexy-overnight</code>, PyPI.</p>
+<h2 id="preference-groups">Preference groups<a class="headerlink" href="#preference-groups" title="Permanent link">&para;</a></h2>
+<p>These groups read and write <code>~/.vexy-overnight/settings.toml</code>. See <a href="../configuration/">Configuration</a> for the file format.</p>
+<h3 id="continuation">continuation<a class="headerlink" href="#continuation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>vomgr<span class="w"> </span>continuation<span class="w"> </span>status
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>vomgr<span class="w"> </span>continuation<span class="w"> </span><span class="nb">set</span><span class="w"> </span>claude<span class="w"> </span>codex<span class="w">     </span><span class="c1"># when claude stops, start codex</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>vomgr<span class="w"> </span>continuation<span class="w"> </span>disable<span class="w"> </span>codex<span class="w">        </span><span class="c1"># codex hands over to nobody</span>
+</code></pre></div>
+<p><code>set</code> also switches the source on. Output: <code>claude continuation now targets codex</code>.</p>
+<h3 id="prompt">prompt<a class="headerlink" href="#prompt" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>vomgr<span class="w"> </span>prompt<span class="w"> </span>show<span class="w"> </span>claude
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>vomgr<span class="w"> </span>prompt<span class="w"> </span><span class="nb">set</span><span class="w"> </span>claude<span class="w"> </span><span class="s1">$'Carry on with:\n{todo}'</span>
+</code></pre></div>
+<p>The shell must pass a real line break: <code>$'…'</code> does that in Bash and Zsh. In plain double quotes, <code>\n</code> is stored as a backslash and an <code>n</code>.</p>
+<p>The template for a tool is used when that tool finishes. Placeholders: <code>{todo}</code>, <code>{plan}</code>, <code>{target}</code>, <code>{source}</code>; see <a href="../continuation/#4-the-prompt">How continuation works</a>.</p>
+<h3 id="notify">notify<a class="headerlink" href="#notify" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>vomgr<span class="w"> </span>notify<span class="w"> </span>show
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>vomgr<span class="w"> </span>notify<span class="w"> </span><span class="nb">set</span><span class="w"> </span>--message<span class="o">=</span><span class="s2">"Handing over to {target}"</span><span class="w"> </span>--enabled<span class="o">=</span>True
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>vomgr<span class="w"> </span>notify<span class="w"> </span>sound<span class="w"> </span>Glass
+</code></pre></div>
+<p>When enabled, the helper prints <code>[vomgr] &lt;message&gt;</code> after it starts the next assistant. <code>{target}</code> and <code>{source}</code> are filled in. The sound name is stored and passed on in <code>VOMGR_NOTIFICATION_SOUND</code>, but nothing plays it in this version.</p>
+<h3 id="terminal">terminal<a class="headerlink" href="#terminal" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>vomgr<span class="w"> </span>terminal<span class="w"> </span>show<span class="w"> </span>darwin
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>open
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>-a
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>Terminal
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>--args
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>bash
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>-lc
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>{command}; exec bash
+</code></pre></div>
+<p>The command used to open a terminal for the helper, per platform (<code>darwin</code>, <code>linux</code>, <code>windows</code>). <code>{command}</code> is replaced by <code>cd &lt;project&gt; &amp;&amp; &lt;python&gt; &lt;helper script&gt;</code>. <code>show</code> fails with <code>no terminal command configured for &lt;platform&gt;</code> when there is none.</p>
+<p><code>vomgr terminal set &lt;platform&gt; &lt;arg&gt; …</code> stores a new command; the last argument must contain <code>{command}</code>. Fire reads any argument that starts with <code>-</code> as a flag, so commands such as <code>bash -lc "{command}"</code> cannot be entered this way: the call fails. Edit <code>[terminals.defaults]</code> in <code>~/.vexy-overnight/settings.toml</code> instead; see <a href="../configuration/#terminals">Configuration</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+          <div class="md-top" data-md-component="top" hidden>
+  <div class="md-top__center">
+    <button type="button" class="md-top__button md-top__button--main" data-md-action="top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+      <span>Back to top</span>
+    </button>
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--nav" for="__drawer" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-left" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+      </label>
+    
+    
+      
+      
+      <label class="md-top__button md-top__side md-top__side--toc" for="__toc" >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-panel-right" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg>
+      </label>
+    
+  </div>
+</div>
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../quickstart/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Quick start">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Quick start
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../launchers/" class="md-footer__link md-footer__link--next" aria-label="Next: Launchers and version-bump">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Launchers and version-bump
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://jaywhj.github.io/mkdocs-materialx/" target="_blank" rel="noopener">
+      MaterialX
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "code": null, "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "code.collapse": "Collapse", "code.download": "Download", "code.expand": "Expand remaining # lines", "code.select": "Toggle line selection", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fc193f93.min.js"></script>
+      
+    
+  </body>
+</html>
