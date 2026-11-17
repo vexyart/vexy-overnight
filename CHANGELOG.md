@@ -112,3 +112,9 @@ this_file: CHANGELOG.md
 - Added `tests/test_hooks.py` to exercise generated vocl-go and voco-go scripts using sandboxed HOME/PATH environments.
 - Taught Codex hook generator to parse stringified JSON context payloads and plain path fallbacks while preserving minimal subprocess usage.
 - Confirmed full suite success via `python -m pytest -xvs`, ensuring new hook tests run alongside existing CLI coverage.
+
+## 2026-10-18: documentation plugins
+
+- Use MaterialX search, inherited metadata and a topic index; keep ordered navigation in awesome-nav.
+- The documentation wrapper installs the plugins required by this site.
+- Strict documentation build and rendered output checks passed.

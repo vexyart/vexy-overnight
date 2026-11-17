@@ -1,3 +1,8 @@
+---
+this_file: src_docs/md/configuration.md
+tags: [Configuration]
+---
+
 # Configuration
 
 ## Where things are stored

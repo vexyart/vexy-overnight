@@ -1,3 +1,8 @@
+---
+this_file: src_docs/md/cli.md
+tags: [Command line]
+---
+
 # vomgr reference
 
 `vomgr` is built with [Python Fire](https://github.com/google/python-fire) from the `VomgrCLI` class in `src/vexy_overnight/cli.py`. Run `vomgr` with no arguments to list the commands and groups.
